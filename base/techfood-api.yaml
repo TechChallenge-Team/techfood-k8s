@@ -1,0 +1,131 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: techfood-api
+  namespace: techfood
+  labels:
+    app.kubernetes.io/name: techfood-api
+    app.kubernetes.io/component: backend
+    app.kubernetes.io/part-of: techfood-system
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: techfood-api
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: techfood-api
+        app.kubernetes.io/component: backend
+        app.kubernetes.io/part-of: techfood-system
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "/metrics"
+    spec:
+      containers:
+        - name: techfood-api
+          image: techfood.api:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8080
+          env:
+            - name: ASPNETCORE_HTTP_PORTS
+              valueFrom:
+                configMapKeyRef:
+                  name: techfood-api-config
+                  key: ASPNETCORE_HTTP_PORTS
+            - name: ASPNETCORE_ENVIRONMENT
+              valueFrom:
+                configMapKeyRef:
+                  name: techfood-api-config
+                  key: ASPNETCORE_ENVIRONMENT
+            - name: TechFoodStaticImagesUrl
+              valueFrom:
+                configMapKeyRef:
+                  name: techfood-api-config
+                  key: TechFoodStaticImagesUrl
+            - name: AllowedHosts
+              valueFrom:
+                configMapKeyRef:
+                  name: techfood-api-config
+                  key: AllowedHosts
+            - name: Jwt__Issuer
+              valueFrom:
+                configMapKeyRef:
+                  name: techfood-api-config
+                  key: Jwt__Issuer
+            - name: Jwt__Audience
+              valueFrom:
+                configMapKeyRef:
+                  name: techfood-api-config
+                  key: Jwt__Audience
+            - name: Payments__MercadoPago__UserId
+              valueFrom:
+                configMapKeyRef:
+                  name: techfood-api-config
+                  key: Payments__MercadoPago__UserId
+            - name: ConnectionStrings__DataBaseConection
+              valueFrom:
+                secretKeyRef:
+                  name: techfood-api-secret
+                  key: ConnectionStrings__DataBaseConection
+            - name: Jwt__Key
+              valueFrom:
+                secretKeyRef:
+                  name: techfood-api-secret
+                  key: Jwt__Key
+            - name: Payments__MercadoPago__AccessToken
+              valueFrom:
+                secretKeyRef:
+                  name: techfood-api-secret
+                  key: Payments__MercadoPago__AccessToken
+          volumeMounts:
+            - name: images-volume
+              mountPath: /app/images
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 5
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 5
+            failureThreshold: 3
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "1Gi"
+              cpu: "500m"
+      volumes:
+        - name: images-volume
+          persistentVolumeClaim:
+            claimName: techfood-images-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: techfood-api-service
+  namespace: techfood
+  labels:
+    app.kubernetes.io/name: techfood-api
+    app.kubernetes.io/component: backend
+    app.kubernetes.io/part-of: techfood-system
+spec:
+  ports:
+    - port: 8080
+      targetPort: 8080
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: techfood-api
+  type: ClusterIP

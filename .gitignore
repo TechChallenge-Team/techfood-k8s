@@ -1,0 +1,46 @@
+# Arquivos temporários
+*.tmp
+*.temp
+*.log
+
+# Arquivos de backup
+*.bak
+*.backup
+
+# Arquivos de configuração local
+local-config.yaml
+*.local.yaml
+
+# Arquivos de secrets locais (nunca commitar!)
+secrets-local.yaml
+*.secret.yaml
+
+# Arquivos de output de comandos
+kubectl-output.txt
+deployment-logs.txt
+
+# Arquivos do Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Arquivos do macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Arquivos do Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+
+# Arquivos de IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Arquivos de teste
+test-output/
+temp-manifests/

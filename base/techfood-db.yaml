@@ -1,0 +1,115 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: techfood-db
+  namespace: techfood
+  labels:
+    app.kubernetes.io/name: techfood-db
+    app.kubernetes.io/component: database
+    app.kubernetes.io/part-of: techfood-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: techfood-db
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: techfood-db
+        app.kubernetes.io/component: database
+        app.kubernetes.io/part-of: techfood-system
+    spec:
+      containers:
+        - name: mssql
+          image: mcr.microsoft.com/mssql/server:2019-latest
+          ports:
+            - containerPort: 1433
+          env:
+            - name: SA_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: techfood-db-secret
+                  key: SA_PASSWORD
+            - name: ACCEPT_EULA
+              valueFrom:
+                secretKeyRef:
+                  name: techfood-db-secret
+                  key: ACCEPT_EULA
+          volumeMounts:
+            - name: mssql-data
+              mountPath: /var/opt/mssql
+          livenessProbe:
+            exec:
+              command:
+                - /opt/mssql-tools18/bin/sqlcmd
+                - -S
+                - localhost
+                - -U
+                - sa
+                - -P
+                - "123456#4EA"
+                - -Q
+                - SELECT 1
+                - -C
+                - -N
+                - -b
+                - -t
+                - "5"
+                - -v
+                - TRUSTSERVERCERTIFICATE=yes
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 5
+          readinessProbe:
+            exec:
+              command:
+                - /opt/mssql-tools18/bin/sqlcmd
+                - -S
+                - localhost
+                - -U
+                - sa
+                - -P
+                - "123456#4EA"
+                - -Q
+                - SELECT 1
+                - -C
+                - -N
+                - -b
+                - -t
+                - "5"
+                - -v
+                - TRUSTSERVERCERTIFICATE=yes
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 5
+            failureThreshold: 3
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "1Gi"
+              cpu: "500m"
+      volumes:
+        - name: mssql-data
+          persistentVolumeClaim:
+            claimName: techfood-db-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: techfood-db-service
+  namespace: techfood
+  labels:
+    app.kubernetes.io/name: techfood-db
+    app.kubernetes.io/component: database
+    app.kubernetes.io/part-of: techfood-system
+spec:
+  ports:
+    - port: 1433
+      targetPort: 1433
+      protocol: TCP
+  selector:
+    app.kubernetes.io/name: techfood-db
+  type: ClusterIP
