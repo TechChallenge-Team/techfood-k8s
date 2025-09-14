@@ -26,7 +26,7 @@ sleep 10
 
 # Aplica os manifestos usando Kustomize
 echo "📦 Aplicando manifetos do Kubernetes..."
-kubectl apply -k k8s/overlays/development/
+kubectl apply -k src/overlays/development/
 
 # Aguarda os pods estarem prontos
 echo "⏳ Aguardando pods ficarem prontos..."

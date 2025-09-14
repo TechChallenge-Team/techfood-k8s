@@ -48,10 +48,10 @@ Execute o script para fazer build das imagens Docker:
 
 ```bash
 # Windows
-k8s\build-images.bat
+build-images.bat
 
 # Linux/Mac
-./k8s/build-images.sh
+./build-images.sh
 ```
 
 ### 5. Deploy da Aplicação
@@ -60,20 +60,20 @@ Execute o script de deploy:
 
 ```bash
 # Windows
-k8s\deploy.bat
+deploy.bat
 
 # Linux/Mac
-./k8s/deploy.sh
+./deploy.sh
 ```
 
 ### 6. Validar o Deploy
 
 ```bash
 # Windows
-k8s\validate.bat
+validate.bat
 
 # Linux/Mac
-./k8s/validate.sh
+./validate.sh
 ```
 
 ### 7. Port Forward para o Serviço Nginx
@@ -92,10 +92,10 @@ minikube service techfood-nginx-service -n techfood
 
 ```bash
 # Windows
-k8s\cleanup.bat
+cleanup.bat
 
 # Linux/Mac
-./k8s/cleanup.sh
+./cleanup.sh
 ```
 
 ## Arquitetura
@@ -153,7 +153,7 @@ A aplicação está configurada com Horizontal Pod Autoscaler:
 ## Estrutura dos Manifestos
 
 ```
-k8s/
+src/
 ├── base/                           # Manifestos base
 │   ├── namespace.yaml             # Namespace da aplicação
 │   ├── configmaps.yaml            # Configurações não sensíveis
@@ -222,7 +222,7 @@ kubectl get events -n techfood --sort-by='.metadata.creationTimestamp'
 kubectl delete namespace techfood
 
 # Ou usar kustomize
-kubectl delete -k k8s/overlays/development/
+kubectl delete -k src/overlays/development/
 ```
 
 ## Notas de Desenvolvimento

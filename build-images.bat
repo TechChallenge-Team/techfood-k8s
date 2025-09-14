@@ -50,8 +50,8 @@ if errorlevel 1 (
 echo ✅ Todas as imagens foram criadas com sucesso!
 echo.
 echo Para fazer o deploy, execute:
-echo kubectl apply -k k8s/overlays/development/
+echo kubectl apply -k src/overlays/development/
 echo.
 echo Ou use o script de deploy:
-echo k8s\deploy.bat
+echo deploy.bat
 pause

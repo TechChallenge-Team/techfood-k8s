@@ -30,7 +30,7 @@ timeout /t 10 /nobreak >nul
 
 REM Aplica os manifestos usando Kustomize
 echo 📦 Aplicando manifetos do Kubernetes...
-kubectl apply -k k8s/overlays/development/
+kubectl apply -k src/overlays/development/
 
 REM Aguarda os pods estarem prontos
 echo ⏳ Aguardando pods ficarem prontos...
@@ -47,11 +47,11 @@ echo.
 echo Para acessar a aplicação:
 echo.
 echo 🔧 OPÇÃO 1 - Port Forward (Recomendado para Windows):
-echo    Execute: k8s\port-forward.bat
+echo    Execute: port-forward.bat
 echo    Depois acesse: http://localhost:30000
 echo.
 echo 🔧 OPÇÃO 2 - Minikube Service (Tunnel):
-echo    Execute: k8s\start-tunnel.bat
+echo    Execute: start-tunnel.bat
 echo    O navegador abrirá automaticamente com a URL correta
 echo.
 echo 🔧 OPÇÃO 3 - Manual:
