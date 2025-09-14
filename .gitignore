@@ -36,7 +36,6 @@ Desktop.ini
 .Trash-*
 
 # Arquivos de IDE
-.vscode/
 .idea/
 *.swp
 *.swo
