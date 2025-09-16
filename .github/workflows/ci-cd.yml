@@ -1,13 +1,11 @@
-name: 🚀 TechFood API - Deploy to EKS
+name: Deploy AWS Production - TechFood API
 
 on:
   push:
-    branches:
-      - "**"
 
 env:
   AWS_REGION: us-east-1
-  CLUSTER_NAME: eks-techfood-terraform
+  CLUSTER_NAME: EKS-TECHFOOD
   NAMESPACE: techfood
 
 jobs:
@@ -26,42 +24,16 @@ jobs:
           aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Setup Kustomize
-        run: |
-          curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash
-          sudo mv kustomize /usr/local/bin/
-
       - name: Update Kube Config
         run: |
           aws eks update-kubeconfig \
             --name ${{ env.CLUSTER_NAME }} \
             --region ${{ env.AWS_REGION }}
 
-      - name: 🔍 Diagnostics
-        run: |
-          set -e
-          echo "== AWS Identity =="
-          aws sts get-caller-identity
-          echo "== Cluster Status =="
-          aws eks describe-cluster --name ${{ env.CLUSTER_NAME }} --region ${{ env.AWS_REGION }} --query 'cluster.status'
-          echo "== Generating token =="
-          aws eks get-token --cluster-name ${{ env.CLUSTER_NAME }} --region ${{ env.AWS_REGION }} >/dev/null
-          echo "== Kubeconfig (current context) =="
-          kubectl config current-context || true
-          echo "== Healthz raw =="
-          kubectl get --raw /healthz || echo "healthz failed"
-          echo "== Nodes (if authorized) =="
-          kubectl get nodes -o wide || echo "no node list"
-          echo "== Can I list pods in namespace techfood? =="
-          kubectl auth can-i list pods -n ${{ env.NAMESPACE }} || echo "cannot list pods"
-          echo "== aws-auth configmap (optional) =="
-          kubectl -n kube-system get configmap aws-auth -o yaml || echo "cannot read aws-auth"
-          echo "Diagnostics finished"
 
       - name: Kube Apply
         run: |
-          kustomize build src/base | kubectl apply --validate=false -f -
-          kubectl rollout status deployment/techfood-api -n ${{ env.NAMESPACE }} --timeout=300s
+          kubectl apply -k src/base --validate=false
 
       - name: Deployment Summary
         run: |
