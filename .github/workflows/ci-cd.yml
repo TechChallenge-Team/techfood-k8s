@@ -11,6 +11,7 @@ on:
 env:
   NAMESPACE: techfood
   AWS_REGION: us-east-1
+  CLUSTER_NAME: eks-techfood-terraform
 
 jobs:
   deploy-to-eks:
@@ -48,10 +49,20 @@ jobs:
 
     - name: 📋 Update kubeconfig
       run: |
-        aws eks update-kubeconfig --region ${{ env.AWS_REGION }} --name eks-techfood-terraform
+        aws eks update-kubeconfig \
+          --name ${{ env.CLUSTER_NAME }} \
+          --region ${{ env.AWS_REGION }}
         kubectl config current-context
+        kubectl cluster-info
 
-    - name: 🚀 Deploy to EKS
+    - name: � Test cluster connectivity
+      run: |
+        echo "Testing cluster connectivity..."
+        kubectl auth can-i get pods --namespace=default
+        kubectl get nodes --no-headers | wc -l
+        echo "Cluster connection OK!"
+
+    - name: �🚀 Deploy to EKS
       run: |
         kustomize build src/base | kubectl apply --validate=false -f -
         kubectl rollout status deployment/techfood-api -n ${{ env.NAMESPACE }} --timeout=300s
