@@ -19,6 +19,19 @@ jobs:
     if: github.event_name == 'push'
 
     steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v3
+
+    - name: 🛠️ Setup kubectl
+      uses: azure/setup-kubectl@v3
+      with:
+        version: 'latest'
+
+    - name: 🛠️ Setup Kustomize
+      run: |
+        curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash
+        sudo mv kustomize /usr/local/bin/
+
     - name: ⚙️ Configure AWS credentials (AWS Academy)
       uses: aws-actions/configure-aws-credentials@v4
       with:
@@ -43,11 +56,29 @@ jobs:
         kubectl config current-context
         kubectl cluster-info --request-timeout=30s
 
-    - name: 🚀 Deploy API to EKS
+    - name: 🔄 Update image references
       run: |
-        echo "🚀 Deploying techfood-api to EKS..."
+        cd src/base
+
+        # Update image reference to use Docker Hub
+        DOCKERHUB_USER="${{ secrets.DOCKERHUB_USERNAME }}"
+
+        # Use kustomize to set the correct image
+        kustomize edit set image techfood-api=${DOCKERHUB_USER}/techfood-api:latest
+
+        echo "📋 Updated image reference:"
+        cat kustomization.yaml
+
+    - name: 🚀 Deploy using base/kustomization.yaml
+      run: |
+        echo "🚀 Deploying techfood-api using base/kustomization.yaml..."
         echo "📦 Using image: ${{ secrets.DOCKERHUB_USERNAME }}/techfood-api:latest"
-        kubectl set image deployment/techfood-api techfood-api=${{ secrets.DOCKERHUB_USERNAME }}/techfood-api:latest -n ${{ env.NAMESPACE }}
+
+        # Apply resources using kustomize from base directory
+        echo "📋 Deploying resources from src/base/kustomization.yaml..."
+        kustomize build src/base | kubectl apply -f -
+
+        echo "⏳ Waiting for deployment rollout..."
         kubectl rollout status deployment/techfood-api -n ${{ env.NAMESPACE }} --timeout=300s
 
     - name: ✅ Deployment Summary

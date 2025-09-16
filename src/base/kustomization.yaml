@@ -8,14 +8,14 @@ resources:
   - configmaps.yaml
   - secrets.yaml
   - pvc.yaml
-  - techfood-db.yaml
+  # - techfood-db.yaml
   - techfood-api.yaml
-  - techfood-admin.yaml
-  - techfood-self-order.yaml
-  - techfood-monitor.yaml
-  - techfood-nginx.yaml
+  # - techfood-admin.yaml
+  # - techfood-self-order.yaml
+  # - techfood-monitor.yaml
+  # - techfood-nginx.yaml
   - hpa.yaml
-  - monitoring.yaml
+  # - monitoring.yaml
 
 commonLabels:
   app.kubernetes.io/version: "1.0.0"

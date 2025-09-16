@@ -25,8 +25,8 @@ spec:
     spec:
       containers:
         - name: techfood-api
-          image: techfood.api:latest
-          imagePullPolicy: Never
+          image: techfood-api:latest
+          imagePullPolicy: Always
           ports:
             - containerPort: 8080
           env:
