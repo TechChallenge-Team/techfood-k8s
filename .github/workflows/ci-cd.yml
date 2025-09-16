@@ -1,73 +1,48 @@
-name: 🚀 TechFood API - Deploy Only
+name: 🚀 TechFood API - Deploy to EKS
 
 on:
   push:
     branches:
       - "**"
-  pull_request:
-    branches:
-      - "**"
 
 env:
-  NAMESPACE: techfood
   AWS_REGION: us-east-1
   CLUSTER_NAME: eks-techfood-terraform
+  NAMESPACE: techfood
 
 jobs:
-  deploy-to-eks:
-    name: 🚀 Deploy API to EKS
+  deploy-production:
+    name: Deploy EKS Production
     runs-on: ubuntu-latest
-    if: github.event_name == 'push'
-    env:
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
-      AWS_DEFAULT_REGION: us-east-1
-
     steps:
-    - name: 📥 Checkout code
-      uses: actions/checkout@v3
+      - name: Checkout Repo
+        uses: actions/checkout@v4
 
-    - name: 🛠️ Setup kubectl
-      uses: azure/setup-kubectl@v3
-      with:
-        version: 'latest'
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: ${{ env.AWS_REGION }}
 
-    - name: 🛠️ Setup Kustomize
-      run: |
-        curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash
-        sudo mv kustomize /usr/local/bin/
+      - name: Setup Kustomize
+        run: |
+          curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash
+          sudo mv kustomize /usr/local/bin/
 
-    - name: ⚙️ Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v4
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
-        aws-region: ${{ env.AWS_REGION }}
-        mask-aws-account-id: false
+      - name: Update Kube Config
+        run: |
+          aws eks update-kubeconfig \
+            --name ${{ env.CLUSTER_NAME }} \
+            --region ${{ env.AWS_REGION }}
 
-    - name: 📋 Update kubeconfig
-      run: |
-        aws eks update-kubeconfig \
-          --name ${{ env.CLUSTER_NAME }} \
-          --region ${{ env.AWS_REGION }}
-        kubectl config current-context
-        kubectl cluster-info
+      - name: Kube Apply
+        run: |
+          kustomize build src/base | kubectl apply --validate=false -f -
+          kubectl rollout status deployment/techfood-api -n ${{ env.NAMESPACE }} --timeout=300s
 
-    - name: � Test cluster connectivity
-      run: |
-        echo "Testing cluster connectivity..."
-        kubectl auth can-i get pods --namespace=default
-        kubectl get nodes --no-headers | wc -l
-        echo "Cluster connection OK!"
-
-    - name: �🚀 Deploy to EKS
-      run: |
-        kustomize build src/base | kubectl apply --validate=false -f -
-        kubectl rollout status deployment/techfood-api -n ${{ env.NAMESPACE }} --timeout=300s
-
-    - name: ✅ Deployment Summary
-      run: |
-        echo "🎉 TechFood API deployed successfully!"
-        kubectl get pods -l app.kubernetes.io/name=techfood-api -n ${{ env.NAMESPACE }}
+      - name: Deployment Summary
+        run: |
+          echo "🎉 TechFood API deployed successfully!"
+          kubectl get pods -l app.kubernetes.io/name=techfood-api -n ${{ env.NAMESPACE }}
