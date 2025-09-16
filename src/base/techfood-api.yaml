@@ -25,7 +25,7 @@ spec:
     spec:
       containers:
         - name: techfood-api
-          image: techfood-api:latest
+          image: grupotechchallenge/techfood-api:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 8080

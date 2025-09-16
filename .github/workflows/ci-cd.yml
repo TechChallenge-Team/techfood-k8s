@@ -37,7 +37,7 @@ jobs:
         curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash
         sudo mv kustomize /usr/local/bin/
 
-    - name: ⚙️ Configure AWS credentials (AWS Academy)
+    - name: ⚙️ Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v4
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -45,115 +45,23 @@ jobs:
         aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
         aws-region: ${{ env.AWS_REGION }}
         mask-aws-account-id: false
-        role-duration-seconds: 3600
-        role-skip-session-tagging: true
 
-    - name: 🔍 Verify AWS credentials
+    - name: 📋 Update kubeconfig
       run: |
-        echo "🔍 Verifying AWS credentials..."
-        echo "🔍 Environment variables:"
-        echo "AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:0:10}..."
-        echo "AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:0:10}..."
-        echo "AWS_SESSION_TOKEN: ${AWS_SESSION_TOKEN:0:20}..."
-        echo "AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION"
-
-        aws sts get-caller-identity
-        echo "📋 Checking AWS caller identity details..."
-        aws sts get-caller-identity --query 'Arn' --output text
-        echo "📋 Checking EKS cluster access..."
-        aws eks describe-cluster --region ${{ env.AWS_REGION }} --name eks-techfood-terraform --query 'cluster.{Name:name,Status:status,Endpoint:endpoint}' --output table
-
-        echo "🔍 CRITICAL: Checking if cluster has worker nodes..."
-        aws eks describe-nodegroup --region ${{ env.AWS_REGION }} --cluster-name eks-techfood-terraform --nodegroup-name $(aws eks list-nodegroups --region ${{ env.AWS_REGION }} --cluster-name eks-techfood-terraform --query 'nodegroups[0]' --output text 2>/dev/null) 2>/dev/null || echo "❌ No nodegroups found!"
-
-        echo "🔍 Listing all nodegroups..."
-        aws eks list-nodegroups --region ${{ env.AWS_REGION }} --cluster-name eks-techfood-terraform --output table
-
-    - name: 📋 Update kubeconfig for EKS
-      run: |
-        echo "📋 Updating kubeconfig for EKS cluster..."
-        aws eks update-kubeconfig --region ${{ env.AWS_REGION }} --name eks-techfood-terraform --alias eks-techfood
-        echo "✅ Kubeconfig updated successfully"
-
-        # Test AWS token functionality directly
-        echo "🔍 Testing AWS EKS get-token command directly..."
-        aws eks get-token --cluster-name eks-techfood-terraform --region ${{ env.AWS_REGION }} || echo "❌ Token generation failed"
-
-        # Debug kubeconfig
-        echo "🔍 Debug: Checking kubeconfig..."
-        kubectl config view --minify
-        echo "🔍 Debug: Current context..."
+        aws eks update-kubeconfig --region ${{ env.AWS_REGION }} --name eks-techfood-terraform
         kubectl config current-context
 
-        # Create a simple test to isolate the issue
-        echo "🔍 Testing AWS credentials with a simple command..."
-        aws sts get-caller-identity || echo "❌ AWS STS failed"
-
-        # Test kubectl auth
-        echo "🔍 Testing kubectl auth can-i..."
-        kubectl auth can-i get pods --namespace=default || echo "❌ kubectl auth failed"
-
-        # Test basic connectivity with extended timeout
-        echo "🔍 Testing cluster connectivity..."
-        kubectl version --short --client || echo "❌ kubectl client version failed"
-        kubectl cluster-info --request-timeout=60s || echo "❌ Cluster info failed - proceeding anyway"
-
-        # CRITICAL: Check if there are any nodes in the cluster
-        echo "🔍 CRITICAL: Checking for worker nodes in the cluster..."
-        kubectl get nodes --request-timeout=30s || echo "❌ No nodes found or unable to connect!"
-
-        echo "🔍 Node details (if any):"
-        kubectl get nodes -o wide --request-timeout=30s || echo "❌ Unable to get node details"
-
-    - name: 🔄 Update image references
+    - name:  Update image references
       run: |
         cd src/base
+        kustomize edit set image techfood-api=grupotechchallenge/techfood-api:latest
 
-        # Update image reference to use Docker Hub
-        DOCKERHUB_USER="${{ secrets.DOCKERHUB_USERNAME }}"
-
-        # Use kustomize to set the correct image
-        kustomize edit set image techfood-api=${DOCKERHUB_USER}/techfood-api:latest
-
-        echo "📋 Updated image reference:"
-        cat kustomization.yaml
-
-    - name: 🚀 Deploy using base/kustomization.yaml
+    - name: � Deploy to EKS
       run: |
-        echo "🚀 Deploying techfood-api using base/kustomization.yaml..."
-        echo "📦 Using image: ${{ secrets.DOCKERHUB_USERNAME }}/techfood-api:latest"
-
-        # Final AWS credentials test before deploy
-        echo "🔍 Final credential check before deployment..."
-        aws sts get-caller-identity
-
-        # Generate and examine the final kustomize output
-        echo "📋 Generating final kustomize output..."
-        kustomize build src/base > /tmp/deployment.yaml
-        echo "📋 Generated deployment manifest:"
-        cat /tmp/deployment.yaml | head -50
-
-        # Apply resources using kustomize from base directory with better error handling
-        echo "📋 Deploying resources from src/base/kustomization.yaml..."
-        if kustomize build src/base | kubectl apply -f - --validate=false; then
-          echo "✅ Deployment applied successfully"
-        else
-          echo "❌ Deployment failed, trying individual resources..."
-          # Fallback: Apply resources individually
-          kubectl apply -f src/base/namespace.yaml --validate=false || echo "namespace may already exist"
-          kubectl apply -f src/base/configmaps.yaml --validate=false
-          kubectl apply -f src/base/secrets.yaml --validate=false
-          kubectl apply -f src/base/pvc.yaml --validate=false
-          kubectl apply -f src/base/techfood-api.yaml --validate=false
-          kubectl apply -f src/base/hpa.yaml --validate=false
-        fi
-
-        echo "⏳ Waiting for deployment rollout..."
-        kubectl rollout status deployment/techfood-api -n ${{ env.NAMESPACE }} --timeout=300s || echo "❌ Rollout status check failed, but deployment may still be successful"
+        kustomize build src/base | kubectl apply -f -
+        kubectl rollout status deployment/techfood-api -n ${{ env.NAMESPACE }} --timeout=300s
 
     - name: ✅ Deployment Summary
       run: |
         echo "🎉 TechFood API deployed successfully!"
-        echo "🏷️ Image: ${{ secrets.DOCKERHUB_USERNAME }}/techfood-api:latest"
-        echo "📅 Deployed at: $(date)"
         kubectl get pods -l app.kubernetes.io/name=techfood-api -n ${{ env.NAMESPACE }}
