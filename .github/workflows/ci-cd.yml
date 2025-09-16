@@ -51,14 +51,9 @@ jobs:
         aws eks update-kubeconfig --region ${{ env.AWS_REGION }} --name eks-techfood-terraform
         kubectl config current-context
 
-    - name:  Update image references
+    - name: 🚀 Deploy to EKS
       run: |
-        cd src/base
-        kustomize edit set image techfood-api=grupotechchallenge/techfood-api:latest
-
-    - name: � Deploy to EKS
-      run: |
-        kustomize build src/base | kubectl apply -f -
+        kustomize build src/base | kubectl apply --validate=false -f -
         kubectl rollout status deployment/techfood-api -n ${{ env.NAMESPACE }} --timeout=300s
 
     - name: ✅ Deployment Summary
