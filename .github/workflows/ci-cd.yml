@@ -33,28 +33,51 @@ jobs:
         sudo mv kustomize /usr/local/bin/
 
     - name: ⚙️ Configure AWS credentials (AWS Academy)
-      uses: aws-actions/configure-aws-credentials@v4
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
-        aws-region: ${{ env.AWS_REGION }}
-        mask-aws-account-id: false
+      run: |
+        echo "🔧 Setting up AWS credentials manually for AWS Academy..."
+
+        # Configure AWS credentials manually
+        aws configure set aws_access_key_id "${{ secrets.AWS_ACCESS_KEY_ID }}"
+        aws configure set aws_secret_access_key "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+        aws configure set aws_session_token "${{ secrets.AWS_SESSION_TOKEN }}"
+        aws configure set region "${{ env.AWS_REGION }}"
+
+        # Also set environment variables as fallback
+        export AWS_ACCESS_KEY_ID="${{ secrets.AWS_ACCESS_KEY_ID }}"
+        export AWS_SECRET_ACCESS_KEY="${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+        export AWS_SESSION_TOKEN="${{ secrets.AWS_SESSION_TOKEN }}"
+        export AWS_DEFAULT_REGION="${{ env.AWS_REGION }}"
+
+        echo "✅ AWS credentials configured"
 
     - name: 🔍 Verify AWS credentials
       run: |
         echo "🔍 Verifying AWS credentials..."
         aws sts get-caller-identity
+        echo "📋 Checking AWS caller identity details..."
+        aws sts get-caller-identity --query 'Arn' --output text
         echo "📋 Checking EKS cluster access..."
         aws eks describe-cluster --region ${{ env.AWS_REGION }} --name eks-techfood-terraform --query 'cluster.{Name:name,Status:status,Endpoint:endpoint}' --output table
 
     - name: 📋 Update kubeconfig for EKS
       run: |
         echo "📋 Updating kubeconfig for EKS cluster..."
-        aws eks update-kubeconfig --region ${{ env.AWS_REGION }} --name eks-techfood-terraform
+        aws eks update-kubeconfig --region ${{ env.AWS_REGION }} --name eks-techfood-terraform --alias eks-techfood
         echo "✅ Kubeconfig updated successfully"
+
+        # Debug kubeconfig
+        echo "🔍 Debug: Checking kubeconfig..."
+        kubectl config view --minify
+        echo "🔍 Debug: Current context..."
         kubectl config current-context
-        kubectl cluster-info --request-timeout=30s
+
+        # Test basic connectivity with extended timeout
+        echo "🔍 Testing cluster connectivity..."
+        kubectl cluster-info --request-timeout=60s
+
+        # Check if we can list namespaces (basic auth test)
+        echo "🔍 Testing namespace access..."
+        kubectl get namespaces --request-timeout=30s
 
     - name: 🔄 Update image references
       run: |
