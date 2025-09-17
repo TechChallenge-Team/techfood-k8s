@@ -5,7 +5,7 @@ on:
 
 env:
   AWS_REGION: us-east-1
-  CLUSTER_NAME: techfood-terraform-api
+  CLUSTER_NAME: eks-techfood-terraform
   NAMESPACE: techfood
 
 jobs:
