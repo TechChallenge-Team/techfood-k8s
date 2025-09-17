@@ -13,7 +13,7 @@ spec:
   resources:
     requests:
       storage: 10Gi
-  storageClassName: standard
+  # storageClassName omitted to use cluster default
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -26,8 +26,8 @@ metadata:
     app.kubernetes.io/part-of: techfood-system
 spec:
   accessModes:
-    - ReadWriteMany
+    - ReadWriteOnce  # EBS only supports RWO. Use EFS for RWX
   resources:
     requests:
       storage: 5Gi
-  storageClassName: standard
+  # storageClassName omitted to use cluster default
