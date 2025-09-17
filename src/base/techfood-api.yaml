@@ -108,8 +108,7 @@ spec:
               cpu: "500m"
       volumes:
         - name: images-volume
-          persistentVolumeClaim:
-            claimName: techfood-images-pvc
+          emptyDir: {}  # Temporary storage - data lost on pod restart
 ---
 apiVersion: v1
 kind: Service
