@@ -26,8 +26,8 @@ metadata:
     app.kubernetes.io/part-of: techfood-system
 spec:
   accessModes:
-    - ReadWriteMany  # EBS only supports RWO. Use EFS for RWX
+    - ReadWriteOnce  # Changed from ReadWriteMany since EBS only supports RWO
   resources:
     requests:
       storage: 5Gi
-  storageClassName: efs-sc
+  storageClassName: gp2  # Changed from efs-sc to use EBS
