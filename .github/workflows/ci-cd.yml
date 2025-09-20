@@ -5,7 +5,7 @@ on:
 
 env:
   AWS_REGION: us-east-1
-  CLUSTER_NAME: eks-techfood-terraform
+  CLUSTER_NAME: techfood-eks
   NAMESPACE: techfood
 
 jobs:
@@ -31,9 +31,23 @@ jobs:
             --region ${{ env.AWS_REGION }}
 
 
-      - name: Kube Apply
+      - name: Update Secrets with GitHub Secrets
         run: |
+          # Montar connection string dinamicamente
+          CONNECTION_STRING="Server=${{ secrets.RDS_ENDPOINT }};User Id=${{ secrets.DB_USERNAME }};Password=${{ secrets.DB_PASSWORD }};TrustServerCertificate=True;"
+          echo "Connection String montada (mascarada para segurança)"
+
+          # Aplicar manifests primeiro
           kubectl apply -k src/base --validate=false
+
+          # Atualizar secret com connection string dinâmica
+          kubectl patch secret techfood-api-secret -n ${{ env.NAMESPACE }} \
+            --type='merge' \
+            --patch "{\"stringData\": {
+              \"ConnectionStrings__DataBaseConection\": \"${CONNECTION_STRING}\",
+              \"Jwt__Key\": \"${{ secrets.JWT_KEY || 'MmUzYjQtOGM1Zi00YTBkLThiMWYtN2EyYzlkNmUzYjRm' }}\",
+              \"Payments__MercadoPago__AccessToken\": \"${{ secrets.MERCADO_PAGO_TOKEN || 'APP_USR-5808215342931102-042817-5d5fee5e46fe9a6b08d17f29e741091f-2414323212' }}\"
+            }}"
 
       - name: Deployment Summary
         run: |
