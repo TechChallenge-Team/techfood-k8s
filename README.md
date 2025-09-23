@@ -189,7 +189,6 @@ src/
 │   ├── configmaps.yaml            # Configurações não sensíveis
 │   ├── secrets.yaml               # Dados sensíveis
 │   ├── pvc.yaml                   # Persistent Volume Claims
-│   ├── techfood-db.yaml           # Database deployment
 │   ├── techfood-api.yaml          # API deployment
 │   ├── techfood-admin.yaml        # Admin app deployment
 │   ├── techfood-self-order.yaml   # Self-order app deployment
