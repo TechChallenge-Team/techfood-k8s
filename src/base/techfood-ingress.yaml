@@ -23,7 +23,8 @@ metadata:
     # Configuração específica para rotas da API
     nginx.ingress.kubernetes.io/server-snippet: |
       location ~* ^/health(/.*)?$ {
-        proxy_pass http://upstream_balancer/api;
+        proxy_set_header X-Forwarded-Prefix /api;
+        proxy_pass http://upstream_balancer;
       }
 spec:
   ingressClassName: nginx
