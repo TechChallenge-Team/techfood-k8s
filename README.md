@@ -31,8 +31,9 @@ minikube start --memory=4096 --cpus=2 --driver=docker
 
 ```bash
 minikube addons enable metrics-server
-minikube addons enable ingress
 ```
+
+**Nota**: O addon do Ingress será instalado automaticamente pelo script `setup-ingress.bat/.sh`
 
 ### 3. Verificar Instalação
 
@@ -66,7 +67,19 @@ deploy.bat
 ./deploy.sh
 ```
 
-### 6. Validar o Deploy
+### 6. Setup do Ingress Controller
+
+Execute o script para instalar o NGINX Ingress Controller:
+
+```bash
+# Windows
+setup-ingress.bat
+
+# Linux/Mac
+./setup-ingress.sh
+```
+
+### 7. Validar o Deploy
 
 ```bash
 # Windows
@@ -76,16 +89,33 @@ validate.bat
 ./validate.sh
 ```
 
-### 7. Port Forward para o Serviço Nginx
-
-```bash
-kubectl port-forward service/techfood-nginx-service 30000:30000 -n techfood
-```
-
 ### 8. Acessar a Aplicação
 
+Após o deploy, você pode acessar a aplicação de duas formas:
+
+#### Opção 1: Via hostname (recomendado)
+
+1. Obtenha o IP do Minikube:
 ```bash
-minikube service techfood-nginx-service -n techfood
+minikube ip
+```
+
+2. Adicione uma entrada no arquivo hosts do seu sistema:
+```bash
+# Windows: C:\Windows\System32\drivers\etc\hosts
+# Linux/Mac: /etc/hosts
+<MINIKUBE_IP> techfood.local
+```
+
+3. Acesse no navegador: `http://techfood.local`
+
+#### Opção 2: Via IP direto
+
+Acesse diretamente via IP do Minikube (sem precisar configurar hosts):
+```bash
+# Obter IP e acessar no navegador
+minikube ip
+# Acesse: http://<MINIKUBE_IP>
 ```
 
 ### 9. Limpeza (Opcional)
@@ -231,7 +261,8 @@ kubectl delete -k src/overlays/development/
 - O banco de dados usa armazenamento persistente
 - As configurações de desenvolvimento reduzem os recursos para economizar CPU/memória
 - O HPA requer o metrics-server habilitado
-- Por padrão, o serviço é exposto via NodePort na porta 30000
+- A aplicação é exposta via NGINX Ingress Controller
+- Acesso através do hostname `techfood.local` ou diretamente via IP do Minikube
 
 ## Comandos Adicionais
 
