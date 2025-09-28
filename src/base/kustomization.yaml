@@ -13,6 +13,7 @@ resources:
   # - techfood-admin.yaml
   # - techfood-self-order.yaml
   # - techfood-monitor.yaml
+  - techfood-nginx.yaml
   - techfood-ingress.yaml
   - hpa.yaml
   # - monitoring.yaml

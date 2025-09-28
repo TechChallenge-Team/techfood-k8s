@@ -30,4 +30,4 @@ spec:
   resources:
     requests:
       storage: 5Gi
-  storageClassName: gp2  # Changed from efs-sc to use EBS
+  storageClassName: efs-sc  # Changed from efs-sc to use EBS
