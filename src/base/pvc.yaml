@@ -26,8 +26,9 @@ metadata:
     app.kubernetes.io/part-of: techfood-system
 spec:
   accessModes:
-    - ReadWriteOnce  # Changed from ReadWriteMany since EBS only supports RWO
+    - ReadWriteMany  # Deve ser ReadWriteMany para combinar com o PV
   resources:
     requests:
-      storage: 5Gi
-  storageClassName: efs-sc  # Changed from efs-sc to use EBS
+      storage: 5Gi  # Pode ser menor que o PV (10Gi)
+  storageClassName: efs-sc
+  volumeName: techfood-efs-pv # Changed from efs-sc to use EBS
