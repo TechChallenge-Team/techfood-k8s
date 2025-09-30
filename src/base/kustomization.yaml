@@ -7,6 +7,7 @@ resources:
   - namespace.yaml
   - configmaps.yaml
   - secrets.yaml
+  - storage.yaml
   - techfood-api.yaml
   # - techfood-admin.yaml
   # - techfood-self-order.yaml

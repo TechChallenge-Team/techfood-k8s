@@ -30,6 +30,22 @@ jobs:
             --name ${{ env.CLUSTER_NAME }} \
             --region ${{ env.AWS_REGION }}
 
+      - name: Install Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: 'latest'
+
+      - name: Install NGINX Ingress Controller
+        run: |
+          # Instalar NGINX Ingress Controller se ainda não existir
+          if ! helm list -n ingress-nginx | grep -q ingress-nginx; then
+            echo "Installing NGINX Ingress Controller..."
+            chmod +x setup-ingress-eks.sh
+            export TARGET_GROUP_ARN="${{ vars.NLB_TARGET_GROUP_ARN }}"
+            ./setup-ingress-eks.sh
+          else
+            echo "NGINX Ingress Controller already installed, skipping..."
+          fi
 
       - name: Update Secrets with GitHub Secrets
         run: |
