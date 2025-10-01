@@ -24,6 +24,18 @@ jobs:
           aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
           aws-region: ${{ env.AWS_REGION }}
 
+      - name: Download outputs.json
+        run: aws s3 cp s3://techfood-bucket/terraform/outputs.json outputs.json
+
+      - name: Parse outputs.json
+        id: tf_outputs
+        run: |
+          RDS_ENDPOINT=$(jq -r '.rds_endpoint.value' outputs.json)
+          NLB_TARGET_GROUP_ARN=$(jq -r '.nlb_target_group_arn.value' outputs.json)
+
+          echo "rds_endpoint=$RDS_ENDPOINT" >> $GITHUB_OUTPUT
+          echo "nlb_target_group_arn=$NLB_TARGET_GROUP_ARN" >> $GITHUB_OUTPUT
+
       - name: Update Kube Config
         run: |
           aws eks update-kubeconfig \
@@ -41,7 +53,7 @@ jobs:
           if ! helm list -n ingress-nginx | grep -q ingress-nginx; then
             echo "Installing NGINX Ingress Controller..."
             chmod +x setup-ingress-eks.sh
-            export TARGET_GROUP_ARN="${{ vars.NLB_TARGET_GROUP_ARN }}"
+            export TARGET_GROUP_ARN="${{ steps.tf_outputs.outputs.nlb_target_group_arn }}"
             ./setup-ingress-eks.sh
           else
             echo "NGINX Ingress Controller already installed, skipping..."
@@ -50,7 +62,7 @@ jobs:
       - name: Update Secrets with GitHub Secrets
         run: |
           # Montar connection string dinamicamente
-          CONNECTION_STRING="Server=${{ secrets.RDS_ENDPOINT }};Database=techfood;User Id=${{ secrets.RDS_USERNAME }};Password=${{ secrets.RDS_PASSWORD }};TrustServerCertificate=True;"
+          CONNECTION_STRING="Server=${{ steps.tf_outputs.outputs.rds_endpoint }};Database=techfood;User Id=${{ secrets.RDS_USERNAME }};Password=${{ secrets.RDS_PASSWORD }};TrustServerCertificate=True;"
           echo "Connection String montada (mascarada para segurança)"
 
           # Aplicar manifests primeiro
@@ -61,8 +73,8 @@ jobs:
             --type='merge' \
             --patch "{\"stringData\": {
               \"ConnectionStrings__DataBaseConection\": \"${CONNECTION_STRING}\",
-              \"Jwt__Key\": \"${{ secrets.JWT_KEY || 'MmUzYjQtOGM1Zi00YTBkLThiMWYtN2EyYzlkNmUzYjRm' }}\",
-              \"Payments__MercadoPago__AccessToken\": \"${{ secrets.MERCADO_PAGO_TOKEN || 'APP_USR-5808215342931102-042817-5d5fee5e46fe9a6b08d17f29e741091f-2414323212' }}\"
+              \"Jwt__Key\": \"${{ secrets.JWT_KEY }}\",
+              \"Payments__MercadoPago__AccessToken\": \"${{ secrets.MERCADO_PAGO_TOKEN }}\"
             }}"
 
       - name: Deployment Summary

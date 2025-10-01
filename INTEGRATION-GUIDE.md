@@ -97,8 +97,8 @@ RDS_ENDPOINT               # Endpoint do RDS (output do Terraform)
 RDS_USERNAME               # Usuário do banco
 RDS_PASSWORD               # Senha do banco
 NLB_TARGET_GROUP_ARN       # ARN do Target Group (output do Terraform)
-JWT_KEY                    # Chave JWT (opcional)
-MERCADO_PAGO_TOKEN         # Token Mercado Pago (opcional)
+JWT_KEY                    # Chave JWT
+MERCADO_PAGO_TOKEN         # Token Mercado Pago
 ```
 
 ## 🚀 Como configurar

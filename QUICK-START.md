@@ -99,8 +99,8 @@ NLB_TARGET_GROUP_ARN       = <ARN copiado do terraform output>
 RDS_ENDPOINT               = <terraform output rds_endpoint>
 RDS_USERNAME               = admin
 RDS_PASSWORD               = <sua senha do RDS>
-JWT_KEY                    = <opcional>
-MERCADO_PAGO_TOKEN         = <opcional>
+JWT_KEY                    = <gere uma chave segura>
+MERCADO_PAGO_TOKEN         = <token do Mercado Pago>
 ```
 
 ---

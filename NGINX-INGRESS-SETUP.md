@@ -85,8 +85,8 @@ Adicione estes **Secrets** no repositório `techfood-k8s`:
 | `RDS_ENDPOINT` | Endpoint do RDS | `terraform output rds_endpoint` |
 | `RDS_USERNAME` | Usuário do banco | Definido no Terraform |
 | `RDS_PASSWORD` | Senha do banco | Definida no Terraform |
-| `JWT_KEY` | Chave JWT (opcional) | Gere uma chave segura |
-| `MERCADO_PAGO_TOKEN` | Token MP (opcional) | Painel Mercado Pago |
+| `JWT_KEY` | Chave JWT | Gere uma chave segura |
+| `MERCADO_PAGO_TOKEN` | Token MP | Painel Mercado Pago |
 
 ### 3️⃣ Fazer deploy:
 

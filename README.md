@@ -1,6 +1,21 @@
 # TechFood - Kubernetes Deployment
 
-Este diretório contém os manifestos e scripts necessários para fazer o deploy da aplicação TechFood no Kubernetes usando Minikube.
+Este diretório contém os manifestos e scripts necessários para fazer o deploy da aplicação TechFood no Kubernetes.
+
+## 🚀 Deploy em AWS EKS
+
+Para deploy em produção no AWS EKS com integração ao NLB do Terraform, consulte:
+- **[NLB-INTEGRATION.md](./NLB-INTEGRATION.md)** - Integração otimizada do Nginx Ingress com o Load Balancer do Terraform
+- **[NGINX-INGRESS-SETUP.md](./NGINX-INGRESS-SETUP.md)** - Setup do Nginx Ingress no EKS
+- **[INTEGRATION-GUIDE.md](./INTEGRATION-GUIDE.md)** - Guia completo de integração
+
+### Scripts para EKS:
+- `setup-ingress-eks.sh/.bat` - Instala Nginx Ingress otimizado para AWS EKS
+- `validate-nlb-integration.sh/.bat` - Valida a integração com o NLB do Terraform
+
+---
+
+## 🏠 Deploy Local (Minikube)
 
 ## Pré-requisitos
 
