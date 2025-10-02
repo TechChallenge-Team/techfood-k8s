@@ -10,26 +10,19 @@ echo "[INFO] Adding NGINX Ingress Helm repository..."
 helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
 helm repo update
 
-# Obter o ARN do Target Group do Terraform
-# Este valor deve ser passado como variável de ambiente ou secret do GitHub Actions
-if [ -z "$TARGET_GROUP_ARN" ]; then
-  echo "[WARNING] TARGET_GROUP_ARN not set. Installing without target group annotation."
-  echo "[WARNING] You will need to register the LoadBalancer manually to the NLB."
-fi
-
 echo ""
 echo "[INFO] Installing NGINX Ingress Controller..."
 
 # Instalar NGINX Ingress Controller
-# O controller criará um Service do tipo LoadBalancer que será registrado no NLB
+# Usando hostNetwork para que o controller use a rede do host (worker nodes)
+# Isso permite que o NLB do Terraform encaminhe tráfego diretamente para os nós
+# SEM criar um LoadBalancer adicional
 helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx \
   --namespace ingress-nginx \
   --create-namespace \
-  --set controller.service.type=LoadBalancer \
-  --set controller.service.annotations."service\.beta\.kubernetes\.io/aws-load-balancer-type"="nlb" \
-  --set controller.service.annotations."service\.beta\.kubernetes\.io/aws-load-balancer-internal"="true" \
-  --set controller.service.annotations."service\.beta\.kubernetes\.io/aws-load-balancer-scheme"="internal" \
-  $(if [ -n "$TARGET_GROUP_ARN" ]; then echo "--set controller.service.annotations.\"service\.beta\.kubernetes\.io/aws-load-balancer-target-group-arn\"=\"${TARGET_GROUP_ARN}\""; fi) \
+  --set controller.hostNetwork=true \
+  --set controller.kind=DaemonSet \
+  --set controller.service.type=ClusterIP \
   --set controller.ingressClassResource.default=true \
   --set controller.metrics.enabled=true \
   --set controller.podAnnotations."prometheus\.io/scrape"="true" \
@@ -51,18 +44,13 @@ kubectl get svc -n ingress-nginx
 echo ""
 echo "[SUCCESS] NGINX Ingress Controller installed successfully!"
 echo ""
-echo "Next steps:"
-echo "1. The LoadBalancer service will create an internal NLB"
-echo "2. Register this NLB with the Terraform-created Target Group"
-echo "3. Deploy your ingress resources"
+echo "✅ Configuration:"
+echo "   - Controller running as DaemonSet with hostNetwork"
+echo "   - Using the NLB created by Terraform (no additional LoadBalancer)"
+echo "   - Worker nodes are automatically registered in the NLB Target Group"
 echo ""
-
-# Obter o endereço do LoadBalancer
-echo "[INFO] Waiting for LoadBalancer address..."
-sleep 10
-LB_HOSTNAME=$(kubectl get svc ingress-nginx-controller -n ingress-nginx -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
-if [ -n "$LB_HOSTNAME" ]; then
-  echo "LoadBalancer Hostname: $LB_HOSTNAME"
-else
-  echo "[WARNING] LoadBalancer address not ready yet. Check with: kubectl get svc -n ingress-nginx"
-fi
+echo "Next steps:"
+echo "1. Verify that worker nodes are registered in the Target Group (via Terraform)"
+echo "2. Deploy your ingress resources"
+echo "3. Test via API Gateway URL"
+echo ""
