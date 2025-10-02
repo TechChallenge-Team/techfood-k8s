@@ -64,6 +64,8 @@ jobs:
           # Montar connection string dinamicamente
           CONNECTION_STRING="Server=${{ steps.tf_outputs.outputs.rds_endpoint }};Database=techfood;User Id=${{ secrets.RDS_USERNAME }};Password=${{ secrets.RDS_PASSWORD }};TrustServerCertificate=True;"
           echo "Connection String montada (mascarada para segurança)"
+          echo ${{ vars.RDS_ENDPOINT }}
+          echo ${{ steps.tf_outputs.outputs.rds_endpoint }}
 
           # Aplicar manifests primeiro
           kubectl apply -k src/base --validate=false
