@@ -25,19 +25,19 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Download outputs.json
-        run: aws s3 cp s3://techfood-bucket/terraform/outputs.json outputs.json
+        run: | 
+          aws s3 cp s3://techfood-bucket/terraform/outputs.json outputs.json && \
+          aws s3 cp s3://techfood-bucket/terraform/db-outputs.json db-outputs.json
 
       - name: Parse outputs.json
         id: tf_outputs
         run: |
-          RDS_ENDPOINT=$(jq -r '.rds_endpoint.value' outputs.json)
           NLB_TARGET_GROUP_ARN=$(jq -r '.nlb_target_group_arn.value' outputs.json)
-          
-          # Substituir : por , para o formato correto do SQL Server
-          RDS_ENDPOINT_FIXED="${RDS_ENDPOINT//:1433/,1433}"
+          RDS_ENDPOINT=$(jq -r '.rds_endpoint.value' db-outputs.json)
+          RDS_ENDPOINT="${RDS_ENDPOINT//:1433/,1433}"
 
-          echo "rds_endpoint=$RDS_ENDPOINT_FIXED" >> $GITHUB_OUTPUT
           echo "nlb_target_group_arn=$NLB_TARGET_GROUP_ARN" >> $GITHUB_OUTPUT
+          echo "rds_endpoint=$RDS_ENDPOINT" >> $GITHUB_OUTPUT
 
       - name: Update Kube Config
         run: |
