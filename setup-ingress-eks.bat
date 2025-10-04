@@ -22,7 +22,10 @@ helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx ^
   --create-namespace ^
   --set controller.hostNetwork=true ^
   --set controller.kind=DaemonSet ^
-  --set controller.service.type=ClusterIP ^
+  --set controller.service.type=NodePort ^
+  --set controller.service.nodePorts.http=30080 ^
+  --set controller.service.nodePorts.https=30443 ^
+  --set controller.service.externalTrafficPolicy=Local ^
   --set controller.ingressClassResource.default=true ^
   --set controller.metrics.enabled=true ^
   --set controller.podAnnotations."prometheus\.io/scrape"="true" ^
