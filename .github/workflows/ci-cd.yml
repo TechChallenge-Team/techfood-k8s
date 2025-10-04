@@ -26,8 +26,8 @@ jobs:
 
       - name: Download outputs.json
         run: | 
-          aws s3 cp s3://techfood-bucket1/terraform/outputs.json outputs.json && \
-          aws s3 cp s3://techfood-bucket1/terraform/db-outputs.json db-outputs.json
+          aws s3 cp s3://techfood/terraform/outputs.json outputs.json && \
+          aws s3 cp s3://techfood/terraform/db-outputs.json db-outputs.json
 
       - name: Parse outputs.json
         id: tf_outputs
