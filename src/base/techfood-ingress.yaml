@@ -1,0 +1,125 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: techfood-ingress
+  namespace: techfood
+  labels:
+    app.kubernetes.io/name: techfood-ingress
+    app.kubernetes.io/component: ingress
+    app.kubernetes.io/part-of: techfood-system
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "30"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "30"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "30"
+    nginx.ingress.kubernetes.io/proxy-set-headers: "techfood/custom-headers"
+    nginx.ingress.kubernetes.io/upstream-vhost: "$host"
+    nginx.ingress.kubernetes.io/use-forwarded-headers: "true"
+    # Rewrite para rota /api
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: techfood.local
+    http:
+      paths:
+      # Root path - redirect to admin
+      - path: /
+        pathType: Exact
+        backend:
+          service:
+            name: techfood-admin-service
+            port:
+              number: 80
+      # Admin application
+      - path: /admin
+        pathType: Prefix
+        backend:
+          service:
+            name: techfood-admin-service
+            port:
+              number: 80
+      # Self-Order application
+      - path: /self-order
+        pathType: Prefix
+        backend:
+          service:
+            name: techfood-self-order-service
+            port:
+              number: 80
+      # Monitor application
+      - path: /monitor
+        pathType: Prefix
+        backend:
+          service:
+            name: techfood-monitor-service
+            port:
+              number: 80
+      # API endpoints (com rewrite)
+      - path: /api(/|$)(.*)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: techfood-api-service
+            port:
+              number: 8080
+      # Health check
+      - path: /health
+        pathType: Prefix
+        backend:
+          service:
+            name: techfood-api-service
+            port:
+              number: 8080
+  # Para acesso via IP local (opcional)
+  - http:
+      paths:
+      # Root path - redirect to admin
+      - path: /
+        pathType: Exact
+        backend:
+          service:
+            name: techfood-admin-service
+            port:
+              number: 80
+      # Admin application
+      - path: /admin
+        pathType: Prefix
+        backend:
+          service:
+            name: techfood-admin-service
+            port:
+              number: 80
+      # Self-Order application
+      - path: /self-order
+        pathType: Prefix
+        backend:
+          service:
+            name: techfood-self-order-service
+            port:
+              number: 80
+      # Monitor application
+      - path: /monitor
+        pathType: Prefix
+        backend:
+          service:
+            name: techfood-monitor-service
+            port:
+              number: 80
+      # API endpoints
+      - path: /api(/|$)(.*)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: techfood-api-service
+            port:
+              number: 8080
+      # Health check
+      - path: /health
+        pathType: Prefix
+        backend:
+          service:
+            name: techfood-api-service
+            port:
+              number: 8080

@@ -1,0 +1,72 @@
+{
+    "files.associations": {
+        "*.yaml": "yaml",
+        "*.yml": "yaml",
+        "Dockerfile*": "dockerfile",
+        "*.bat": "bat",
+        "*.sh": "shellscript"
+    },
+    "yaml.schemas": {
+        "https://raw.githubusercontent.com/kubernetes/kubernetes/master/api/openapi-spec/swagger.json": [
+            "src/base/*.yaml",
+            "src/overlays/**/*.yaml"
+        ]
+    },
+    "yaml.validate": true,
+    "yaml.completion": true,
+    "yaml.hover": true,
+    "yaml.format.enable": true,
+    "yaml.format.singleQuote": false,
+    "yaml.format.bracketSpacing": true,
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true,
+    "editor.detectIndentation": false,
+    "files.trimTrailingWhitespace": true,
+    "files.insertFinalNewline": true,
+    "files.trimFinalNewlines": true,
+    "editor.rulers": [80, 120],
+    "editor.wordWrap": "bounded",
+    "editor.wordWrapColumn": 120,
+    "terminal.integrated.defaultProfile.windows": "PowerShell",
+    "git.ignoreLimitWarning": true,
+    "explorer.fileNesting.enabled": true,
+    "explorer.fileNesting.patterns": {
+        "*.bat": "${capture}.sh",
+        "*.yaml": "${capture}.yml",
+        "kustomization.yaml": "*.yaml, *.yml",
+        "README.md": "*.md"
+    },
+    "workbench.tree.indent": 20,
+    "kubernetes-intellisense.vs-kubernetes.namespace": "techfood",
+    "kubernetes-intellisense.vs-kubernetes.context": "minikube",
+    "todo-tree.general.tags": [
+        "BUG",
+        "HACK",
+        "FIXME",
+        "TODO",
+        "XXX",
+        "[ ]",
+        "[x]"
+    ],
+    "todo-tree.regex.regex": "(//|#|<!--|;|/\\*|^|^\\s*(-|\\d+.))\\s*($TAGS).*(\\n\\s*//\\s{2,}.*)*",
+    "markdownlint.config": {
+        "MD013": {
+            "line_length": 120,
+            "code_blocks": false,
+            "tables": false
+        },
+        "MD033": false
+    },
+    "cSpell.words": [
+        "techfood",
+        "minikube",
+        "kubectl",
+        "kustomize",
+        "kubernetes",
+        "dockerfile",
+        "nginx",
+        "mssql",
+        "aspnetcore",
+        "postgresql"
+    ]
+}

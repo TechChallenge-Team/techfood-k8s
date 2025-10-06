@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: techfood-api
+  namespace: techfood
+spec:
+  replicas: 1
+  template:
+    spec:
+      containers:
+        - name: techfood-api
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "250m"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: techfood-admin
+  namespace: techfood
+spec:
+  replicas: 1
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: techfood-self-order
+  namespace: techfood
+spec:
+  replicas: 1
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: techfood-monitor
+  namespace: techfood
+spec:
+  replicas: 1
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: techfood-nginx
+  namespace: techfood
+spec:
+  replicas: 1

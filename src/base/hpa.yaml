@@ -1,0 +1,191 @@
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: techfood-api-hpa
+  namespace: techfood
+  labels:
+    app.kubernetes.io/name: techfood-api
+    app.kubernetes.io/component: autoscaler
+    app.kubernetes.io/part-of: techfood-system
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: techfood-api
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 60
+      policies:
+        - type: Percent
+          value: 100
+          periodSeconds: 15
+        - type: Pods
+          value: 2
+          periodSeconds: 60
+      selectPolicy: Max
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+        - type: Percent
+          value: 50
+          periodSeconds: 60
+        - type: Pods
+          value: 1
+          periodSeconds: 60
+      selectPolicy: Min
+---
+# apiVersion: autoscaling/v2
+# kind: HorizontalPodAutoscaler
+# metadata:
+#   name: techfood-self-order-hpa
+#   namespace: techfood
+#   labels:
+#     app.kubernetes.io/name: techfood-self-order
+#     app.kubernetes.io/component: autoscaler
+#     app.kubernetes.io/part-of: techfood-system
+# spec:
+#   scaleTargetRef:
+#     apiVersion: apps/v1
+#     kind: Deployment
+#     name: techfood-self-order
+#   minReplicas: 3
+#   maxReplicas: 15
+#   metrics:
+#     - type: Resource
+#       resource:
+#         name: cpu
+#         target:
+#           type: Utilization
+#           averageUtilization: 70
+#     - type: Resource
+#       resource:
+#         name: memory
+#         target:
+#           type: Utilization
+#           averageUtilization: 80
+#   behavior:
+#     scaleUp:
+#       stabilizationWindowSeconds: 60
+#       policies:
+#         - type: Percent
+#           value: 100
+#           periodSeconds: 15
+#         - type: Pods
+#           value: 3
+#           periodSeconds: 60
+#       selectPolicy: Max
+#     scaleDown:
+#       stabilizationWindowSeconds: 300
+#       policies:
+#         - type: Percent
+#           value: 50
+#           periodSeconds: 60
+#         - type: Pods
+#           value: 1
+#           periodSeconds: 60
+#       selectPolicy: Min
+# ---
+# apiVersion: autoscaling/v2
+# kind: HorizontalPodAutoscaler
+# metadata:
+#   name: techfood-admin-hpa
+#   namespace: techfood
+#   labels:
+#     app.kubernetes.io/name: techfood-admin
+#     app.kubernetes.io/component: autoscaler
+#     app.kubernetes.io/part-of: techfood-system
+# spec:
+#   scaleTargetRef:
+#     apiVersion: apps/v1
+#     kind: Deployment
+#     name: techfood-admin
+#   minReplicas: 2
+#   maxReplicas: 5
+#   metrics:
+#     - type: Resource
+#       resource:
+#         name: cpu
+#         target:
+#           type: Utilization
+#           averageUtilization: 70
+#     - type: Resource
+#       resource:
+#         name: memory
+#         target:
+#           type: Utilization
+#           averageUtilization: 80
+# ---
+# apiVersion: autoscaling/v2
+# kind: HorizontalPodAutoscaler
+# metadata:
+#   name: techfood-monitor-hpa
+#   namespace: techfood
+#   labels:
+#     app.kubernetes.io/name: techfood-monitor
+#     app.kubernetes.io/component: autoscaler
+#     app.kubernetes.io/part-of: techfood-system
+# spec:
+#   scaleTargetRef:
+#     apiVersion: apps/v1
+#     kind: Deployment
+#     name: techfood-monitor
+#   minReplicas: 2
+#   maxReplicas: 5
+#   metrics:
+#     - type: Resource
+#       resource:
+#         name: cpu
+#         target:
+#           type: Utilization
+#           averageUtilization: 70
+#     - type: Resource
+#       resource:
+#         name: memory
+#         target:
+#           type: Utilization
+#           averageUtilization: 80
+# ---
+# apiVersion: autoscaling/v2
+# kind: HorizontalPodAutoscaler
+# metadata:
+#   name: techfood-nginx-hpa
+#   namespace: techfood
+#   labels:
+#     app.kubernetes.io/name: techfood-nginx
+#     app.kubernetes.io/component: autoscaler
+#     app.kubernetes.io/part-of: techfood-system
+# spec:
+#   scaleTargetRef:
+#     apiVersion: apps/v1
+#     kind: Deployment
+#     name: techfood-nginx
+#   minReplicas: 2
+#   maxReplicas: 5
+#   metrics:
+#     - type: Resource
+#       resource:
+#         name: cpu
+#         target:
+#           type: Utilization
+#           averageUtilization: 70
+#     - type: Resource
+#       resource:
+#         name: memory
+#         target:
+#           type: Utilization
+#           averageUtilization: 80
