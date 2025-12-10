@@ -26,7 +26,7 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Download outputs.json
-        run: | 
+        run: |
           aws s3 cp s3://${{ vars.TF_BUCKET_NAME }}/outputs.json outputs.json && \
           aws s3 cp s3://${{ vars.TF_BUCKET_NAME }}/db-outputs.json db-outputs.json
 
@@ -36,9 +36,18 @@ jobs:
           NLB_TARGET_GROUP_ARN=$(jq -r '.nlb_target_group_arn.value' outputs.json)
           RDS_ENDPOINT=$(jq -r '.rds_endpoint.value' db-outputs.json)
           RDS_ENDPOINT="${RDS_ENDPOINT//:1433/,1433}"
+          DOCDB_ENDPOINT=$(jq -r '.docdb_cluster_endpoint.value' db-outputs.json)
+          DOCDB_PORT=$(jq -r '.docdb_port.value' db-outputs.json)
+
+          API_GATEWAY_URL=$(jq -r '.api_gateway_url.value' outputs.json)
+          AUTH_API_INVOKE_URL=$(jq -r '.auth_api_invoke_url.value' outputs.json)
 
           echo "nlb_target_group_arn=$NLB_TARGET_GROUP_ARN" >> $GITHUB_OUTPUT
           echo "rds_endpoint=$RDS_ENDPOINT" >> $GITHUB_OUTPUT
+          echo "docdb_endpoint=$DOCDB_ENDPOINT" >> $GITHUB_OUTPUT
+          echo "docdb_port=$DOCDB_PORT" >> $GITHUB_OUTPUT
+          echo "api_gateway_url=$API_GATEWAY_URL" >> $GITHUB_OUTPUT
+          echo "auth_api_invoke_url=$AUTH_API_INVOKE_URL" >> $GITHUB_OUTPUT
 
       - name: Update Kube Config
         run: |
@@ -65,20 +74,54 @@ jobs:
 
       - name: Apply Kubernetes Manifests and Update Secrets
         run: |
-          # Montar connection string dinamicamente
-          CONNECTION_STRING="Server=${{ steps.tf_outputs.outputs.rds_endpoint }};Database=techfood;User Id=${{ secrets.RDS_USERNAME }};Password=${{ secrets.RDS_PASSWORD }};TrustServerCertificate=True;"
-          echo "Connection String montada (mascarada para segurança)"
-
           # Aplicar manifests primeiro
           kubectl apply -k src/base --validate=false
 
-          # Atualizar secret com connection string dinâmica
-          kubectl patch secret techfood-api-secret -n ${{ env.NAMESPACE }} \
+          # Connection strings por serviço
+          ORDER_CONN="Server=${{ steps.tf_outputs.outputs.rds_endpoint }};Database=techfood_order;User Id=${{ secrets.RDS_USERNAME }};Password=${{ secrets.RDS_PASSWORD }};TrustServerCertificate=True;"
+          PAYMENT_CONN="Server=${{ steps.tf_outputs.outputs.rds_endpoint }};Database=techfood_payment;User Id=${{ secrets.RDS_USERNAME }};Password=${{ secrets.RDS_PASSWORD }};TrustServerCertificate=True;"
+          KITCHEN_CONN="Server=${{ steps.tf_outputs.outputs.rds_endpoint }};Database=techfood_kitchen;User Id=${{ secrets.RDS_USERNAME }};Password=${{ secrets.RDS_PASSWORD }};TrustServerCertificate=True;"
+          BACKOFFICE_CONN="mongodb://${{ secrets.DOCDB_USERNAME }}:${{ secrets.DOCDB_PASSWORD }}@${{ steps.tf_outputs.outputs.docdb_endpoint }}:${{ steps.tf_outputs.outputs.docdb_port }}/techfood_backoffice?authSource=admin"
+
+          # Atualizar config compartilhada com descoberta de serviços
+          kubectl patch configmap techfood-shared-config -n ${{ env.NAMESPACE }} \
+            --type='merge' \
+            --patch "{\"data\": {
+              \"Services__Authentication\": \"${{ steps.tf_outputs.outputs.auth_api_invoke_url }}\",
+              \"Services__Order\": \"${{ steps.tf_outputs.outputs.api_gateway_url }}/api/order\",
+              "Services__Payment": "${{ steps.tf_outputs.outputs.api_gateway_url }}/api/payment",
+              "Services__Backoffice": "${{ steps.tf_outputs.outputs.api_gateway_url }}/api/backoffice",
+              "Services__Kitchen": "${{ steps.tf_outputs.outputs.api_gateway_url }}/api/kitchen"
+            }}"
+
+          # Atualizar secrets compartilhados e de cada serviço
+          kubectl patch secret techfood-shared-secret -n ${{ env.NAMESPACE }} \
             --type='merge' \
             --patch "{\"stringData\": {
-              \"ConnectionStrings__DataBaseConection\": \"${CONNECTION_STRING}\",
-              \"Jwt__Key\": \"${{ secrets.JWT_KEY }}\",
+              \"Authentication__Jwt__Key\": \"${{ secrets.JWT_KEY }}\",
+              \"EventBus__RabbitMQ__UserName\": \"${{ secrets.RABBITMQ_USERNAME }}\",
+              \"EventBus__RabbitMQ__Password\": \"${{ secrets.RABBITMQ_PASSWORD }}\"
+            }}"
+
+          kubectl patch secret techfood-order-secret -n ${{ env.NAMESPACE }} \
+            --type='merge' \
+            --patch "{\"stringData\": {\"ConnectionStrings__DataBaseConection\": \"${ORDER_CONN}\"}}"
+
+          kubectl patch secret techfood-payment-secret -n ${{ env.NAMESPACE }} \
+            --type='merge' \
+            --patch "{\"stringData\": {
+              \"ConnectionStrings__DataBaseConection\": \"${PAYMENT_CONN}\",
               \"Payments__MercadoPago__AccessToken\": \"${{ secrets.MERCADO_PAGO_TOKEN }}\"
+            }}"
+
+          kubectl patch secret techfood-kitchen-secret -n ${{ env.NAMESPACE }} \
+            --type='merge' \
+            --patch "{\"stringData\": {\"ConnectionStrings__DataBaseConection\": \"${KITCHEN_CONN}\"}}"
+
+          kubectl patch secret techfood-backoffice-secret -n ${{ env.NAMESPACE }} \
+            --type='merge' \
+            --patch "{\"stringData\": {
+              \"ConnectionStrings__DataBaseConection\": \"${BACKOFFICE_CONN}\"
             }}"
 
       - name: Deployment Summary

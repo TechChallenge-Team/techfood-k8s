@@ -155,8 +155,11 @@ A aplicação TechFood é composta pelos seguintes componentes:
 
 ### Backend Services
 
-- **API**: API REST principal da aplicação
-- **Database**: SQL Server para persistência de dados
+- **Order API / Worker**: processamento de pedidos
+- **Payment API / Worker**: pagamentos e integrações
+- **Backoffice API**: gestão e conteúdo estático (imagens)
+- **Kitchen API / Worker**: operações de cozinha
+- **Database**: SQL Server/Mongo conforme serviço
 - **Nginx**: Reverse proxy e load balancer
 
 ### Infraestrutura Kubernetes
@@ -227,7 +230,10 @@ Após o deploy, a aplicação estará disponível nos seguintes endpoints:
 - **Admin**: http://localhost:30000/admin
 - **Self-Order**: http://localhost:30000/self-order
 - **Monitor**: http://localhost:30000/monitor
-- **API**: http://localhost:30000/api
+- **Order API**: http://localhost:30000/api/order
+- **Payment API**: http://localhost:30000/api/payment
+- **Backoffice API**: http://localhost:30000/api/backoffice
+- **Kitchen API**: http://localhost:30000/api/kitchen
 - **Health Check**: http://localhost:30000/health
 
 ### Monitoramento
