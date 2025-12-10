@@ -39,6 +39,8 @@ jobs:
           DOCDB_ENDPOINT=$(jq -r '.docdb_cluster_endpoint.value' db-outputs.json)
           DOCDB_PORT=$(jq -r '.docdb_port.value' db-outputs.json)
 
+          RABBITMQ_ENDPOINT=$(jq -r '.rabbitmq_amqp_endpoint.value' outputs.json)
+
           API_GATEWAY_URL=$(jq -r '.api_gateway_url.value' outputs.json)
           AUTH_API_INVOKE_URL=$(jq -r '.auth_api_invoke_url.value' outputs.json)
 
@@ -46,6 +48,7 @@ jobs:
           echo "rds_endpoint=$RDS_ENDPOINT" >> $GITHUB_OUTPUT
           echo "docdb_endpoint=$DOCDB_ENDPOINT" >> $GITHUB_OUTPUT
           echo "docdb_port=$DOCDB_PORT" >> $GITHUB_OUTPUT
+          echo "rabbitmq_endpoint=$RABBITMQ_ENDPOINT" >> $GITHUB_OUTPUT
           echo "api_gateway_url=$API_GATEWAY_URL" >> $GITHUB_OUTPUT
           echo "auth_api_invoke_url=$AUTH_API_INVOKE_URL" >> $GITHUB_OUTPUT
 
@@ -83,6 +86,10 @@ jobs:
           KITCHEN_CONN="Server=${{ steps.tf_outputs.outputs.rds_endpoint }};Database=techfood_kitchen;User Id=${{ secrets.RDS_USERNAME }};Password=${{ secrets.RDS_PASSWORD }};TrustServerCertificate=True;"
           BACKOFFICE_CONN="mongodb://${{ secrets.DOCDB_USERNAME }}:${{ secrets.DOCDB_PASSWORD }}@${{ steps.tf_outputs.outputs.docdb_endpoint }}:${{ steps.tf_outputs.outputs.docdb_port }}/techfood_backoffice?authSource=admin"
 
+          # RabbitMQ host/port (fallback port 5672 if não presente na URL)
+          RABBITMQ_HOST="${{ steps.tf_outputs.outputs.rabbitmq_endpoint }}"
+          RABBITMQ_PORT="5672"
+
           # Atualizar config compartilhada com descoberta de serviços
           kubectl patch configmap techfood-shared-config -n ${{ env.NAMESPACE }} \
             --type='merge' \
@@ -91,13 +98,19 @@ jobs:
               \"Services__Order\": \"${{ steps.tf_outputs.outputs.api_gateway_url }}/api/order\",
               \"Services__Payment\": \"${{ steps.tf_outputs.outputs.api_gateway_url }}/api/payment\",
               \"Services__Backoffice\": \"${{ steps.tf_outputs.outputs.api_gateway_url }}/api/backoffice\",
-              \"Services__Kitchen\": \"${{ steps.tf_outputs.outputs.api_gateway_url }}/api/kitchen\"
+              \"Services__Kitchen\": \"${{ steps.tf_outputs.outputs.api_gateway_url }}/api/kitchen\",
+              \"EventBus__RabbitMQ__HostName\": \"${RABBITMQ_HOST}\",
+              \"EventBus__RabbitMQ__Port\": \"${RABBITMQ_PORT}\"
             }}"
 
           # Atualizar secrets compartilhados e de cada serviço
           kubectl patch secret techfood-shared-secret -n ${{ env.NAMESPACE }} \
             --type='merge' \
-            --patch "{\"stringData\": {\"Authentication__Jwt__Key\": \"${{ secrets.JWT_KEY }}\"}}"
+            --patch "{\"stringData\": {
+              \"Authentication__Jwt__Key\": \"${{ secrets.JWT_KEY }}\",
+              \"EventBus__RabbitMQ__UserName\": \"${{ secrets.RABBITMQ_USERNAME }}\",
+              \"EventBus__RabbitMQ__Password\": \"${{ secrets.RABBITMQ_PASSWORD }}\"
+            }}"
 
           kubectl patch secret techfood-order-secret -n ${{ env.NAMESPACE }} \
             --type='merge' \
