@@ -13,7 +13,7 @@ data:
   Services__Payment: "http://localhost:45002/"
   Services__Backoffice: "http://localhost:45004/"
   Services__Kitchen: "http://localhost:45005/"
-  EventBus__RabbitMQ__HostName: "localhost"
+  EventBus__RabbitMQ__HostName: "rabbitmq-service.techfood.svc.cluster.local"
   EventBus__RabbitMQ__Port: "5672"
 ---
 apiVersion: v1
