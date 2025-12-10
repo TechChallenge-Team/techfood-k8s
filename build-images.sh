@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Script para fazer build das imagens Docker no Minikube
+# Script para fazer build das imagens Docker no Minikube (microservices + frontends)
 
 echo "🐳 Fazendo build das imagens Docker para o Minikube..."
 
@@ -8,47 +8,37 @@ echo "🐳 Fazendo build das imagens Docker para o Minikube..."
 echo "🔧 Configurando ambiente Docker do Minikube..."
 eval $(minikube docker-env)
 
-# Build da API
-echo "📦 Building TechFood.Api..."
-docker build -t techfood.api:latest -f src/TechFood.Api/Dockerfile .
-if [ $? -ne 0 ]; then
-    echo "❌ Erro ao fazer build da API"
-    exit 1
-fi
+images=(
+    "grupotechchallenge/techfood-order-api:latest|services/order-api/Dockerfile|services/order-api"
+    "grupotechchallenge/techfood-order-worker:latest|services/order-worker/Dockerfile|services/order-worker"
+    "grupotechchallenge/techfood-payment-api:latest|services/payment-api/Dockerfile|services/payment-api"
+    "grupotechchallenge/techfood-payment-worker:latest|services/payment-worker/Dockerfile|services/payment-worker"
+    "grupotechchallenge/techfood-backoffice-api:latest|services/backoffice-api/Dockerfile|services/backoffice-api"
+    "grupotechchallenge/techfood-kitchen-api:latest|services/kitchen-api/Dockerfile|services/kitchen-api"
+    "grupotechchallenge/techfood-kitchen-worker:latest|services/kitchen-worker/Dockerfile|services/kitchen-worker"
+    # Frontends e nginx
+    "techfood.admin:latest|apps/admin/Dockerfile|apps/admin"
+    "techfood.self-order:latest|apps/self-order/Dockerfile|apps/self-order"
+    "techfood.monitor:latest|apps/monitor/Dockerfile|apps/monitor"
+    "techfood.nginx:latest|nginx/Dockerfile|nginx"
+)
 
-# Build do Admin
-echo "📦 Building TechFood.Admin..."
-docker build -t techfood.admin:latest -f apps/admin/Dockerfile .
-if [ $? -ne 0 ]; then
-    echo "❌ Erro ao fazer build do Admin"
-    exit 1
-fi
+for entry in "${images[@]}"; do
+    IFS='|' read -r tag dockerfile context <<<"$entry"
+    if [ ! -f "$dockerfile" ]; then
+        echo "⚠️  Dockerfile não encontrado para $tag em $dockerfile, pulando..."
+        continue
+    fi
 
-# Build do Self-Order
-echo "📦 Building TechFood.Self-Order..."
-docker build -t techfood.self-order:latest -f apps/self-order/Dockerfile .
-if [ $? -ne 0 ]; then
-    echo "❌ Erro ao fazer build do Self-Order"
-    exit 1
-fi
+    echo "📦 Building $tag ..."
+    docker build -t "$tag" -f "$dockerfile" "$context"
+    if [ $? -ne 0 ]; then
+        echo "❌ Erro ao fazer build de $tag"
+        exit 1
+    fi
+done
 
-# Build do Monitor
-echo "📦 Building TechFood.Monitor..."
-docker build -t techfood.monitor:latest -f apps/monitor/Dockerfile .
-if [ $? -ne 0 ]; then
-    echo "❌ Erro ao fazer build do Monitor"
-    exit 1
-fi
-
-# Build do Nginx
-echo "📦 Building TechFood.Nginx..."
-docker build -t techfood.nginx:latest -f nginx/Dockerfile nginx/
-if [ $? -ne 0 ]; then
-    echo "❌ Erro ao fazer build do Nginx"
-    exit 1
-fi
-
-echo "✅ Todas as imagens foram criadas com sucesso!"
+echo "✅ Todas as imagens foram processadas."
 echo ""
 echo "Para fazer o deploy, execute:"
 echo "kubectl apply -k src/overlays/development/"

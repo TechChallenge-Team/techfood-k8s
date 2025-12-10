@@ -1,20 +1,88 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: techfood-api-config
+  name: techfood-shared-config
   namespace: techfood
   labels:
-    app.kubernetes.io/name: techfood-api
+    app.kubernetes.io/name: techfood-shared-config
+    app.kubernetes.io/component: config
+    app.kubernetes.io/part-of: techfood-system
+data:
+  Services__Authentication: "http://localhost:45000/"
+  Services__Order: "http://localhost:45001/"
+  Services__Payment: "http://localhost:45002/"
+  Services__Backoffice: "http://localhost:45004/"
+  Services__Kitchen: "http://localhost:45005/"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: techfood-order-config
+  namespace: techfood
+  labels:
+    app.kubernetes.io/name: techfood-order-config
     app.kubernetes.io/component: config
     app.kubernetes.io/part-of: techfood-system
 data:
   ASPNETCORE_ENVIRONMENT: "Development"
   ASPNETCORE_HTTP_PORTS: "8080"
-  TechFoodStaticImagesUrl: "/static-images"
   AllowedHosts: "*"
   Jwt__Issuer: "techfood-jwts"
   Jwt__Audience: "techfood"
+  Authentication__ClientId: "order-service"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: techfood-payment-config
+  namespace: techfood
+  labels:
+    app.kubernetes.io/name: techfood-payment-config
+    app.kubernetes.io/component: config
+    app.kubernetes.io/part-of: techfood-system
+data:
+  ASPNETCORE_ENVIRONMENT: "Development"
+  ASPNETCORE_HTTP_PORTS: "8080"
+  AllowedHosts: "*"
+  Jwt__Issuer: "techfood-jwts"
+  Jwt__Audience: "techfood"
+  Authentication__ClientId: "payment-service"
   Payments__MercadoPago__UserId: "2414323212"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: techfood-backoffice-config
+  namespace: techfood
+  labels:
+    app.kubernetes.io/name: techfood-backoffice-config
+    app.kubernetes.io/component: config
+    app.kubernetes.io/part-of: techfood-system
+data:
+  ASPNETCORE_ENVIRONMENT: "Development"
+  ASPNETCORE_HTTP_PORTS: "8080"
+  AllowedHosts: "*"
+  Jwt__Issuer: "techfood-jwts"
+  Jwt__Audience: "techfood"
+  Authentication__ClientId: "backoffice-service"
+  TechFoodStaticImagesUrl: "/static-images"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: techfood-kitchen-config
+  namespace: techfood
+  labels:
+    app.kubernetes.io/name: techfood-kitchen-config
+    app.kubernetes.io/component: config
+    app.kubernetes.io/part-of: techfood-system
+data:
+  ASPNETCORE_ENVIRONMENT: "Development"
+  ASPNETCORE_HTTP_PORTS: "8080"
+  AllowedHosts: "*"
+  Jwt__Issuer: "techfood-jwts"
+  Jwt__Audience: "techfood"
+  Authentication__ClientId: "kitchen-service"
 ---
 apiVersion: v1
 kind: ConfigMap

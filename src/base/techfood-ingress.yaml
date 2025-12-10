@@ -57,11 +57,32 @@ spec:
             port:
               number: 80
       # API endpoints (com rewrite)
-      - path: /api(/|$)(.*)
+      - path: /api/order(/|$)(.*)
         pathType: ImplementationSpecific
         backend:
           service:
-            name: techfood-api-service
+            name: techfood-order-api-service
+            port:
+              number: 8080
+      - path: /api/payment(/|$)(.*)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: techfood-payment-api-service
+            port:
+              number: 8080
+      - path: /api/backoffice(/|$)(.*)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: techfood-backoffice-api-service
+            port:
+              number: 8080
+      - path: /api/kitchen(/|$)(.*)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: techfood-kitchen-api-service
             port:
               number: 8080
       # Health check
@@ -69,7 +90,7 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: techfood-api-service
+            name: techfood-order-api-service
             port:
               number: 8080
   # Para acesso via IP local (opcional)
@@ -108,11 +129,32 @@ spec:
             port:
               number: 80
       # API endpoints
-      - path: /api(/|$)(.*)
+      - path: /api/order(/|$)(.*)
         pathType: ImplementationSpecific
         backend:
           service:
-            name: techfood-api-service
+            name: techfood-order-api-service
+            port:
+              number: 8080
+      - path: /api/payment(/|$)(.*)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: techfood-payment-api-service
+            port:
+              number: 8080
+      - path: /api/backoffice(/|$)(.*)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: techfood-backoffice-api-service
+            port:
+              number: 8080
+      - path: /api/kitchen(/|$)(.*)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: techfood-kitchen-api-service
             port:
               number: 8080
       # Health check
@@ -120,6 +162,6 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: techfood-api-service
+            name: techfood-order-api-service
             port:
               number: 8080

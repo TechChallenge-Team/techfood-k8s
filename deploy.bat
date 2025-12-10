@@ -65,7 +65,10 @@ echo Após estabelecer a conexão, os endpoints estarão disponíveis em:
 echo - Admin: http://localhost:30000/admin
 echo - Self-Order: http://localhost:30000/self-order
 echo - Monitor: http://localhost:30000/monitor
-echo - API: http://localhost:30000/api
+echo - Order API: http://localhost:30000/api/order
+echo - Payment API: http://localhost:30000/api/payment
+echo - Backoffice API: http://localhost:30000/api/backoffice
+echo - Kitchen API: http://localhost:30000/api/kitchen
 echo.
 echo Para monitorar os recursos:
 echo kubectl get pods -n techfood -w

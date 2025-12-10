@@ -1,0 +1,82 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: techfood-payment-api
+  namespace: techfood
+  labels:
+    app.kubernetes.io/name: techfood-payment-api
+    app.kubernetes.io/component: backend
+    app.kubernetes.io/part-of: techfood-system
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: techfood-payment-api
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: techfood-payment-api
+        app.kubernetes.io/component: backend
+        app.kubernetes.io/part-of: techfood-system
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "/metrics"
+    spec:
+      containers:
+        - name: techfood-payment-api
+          image: grupotechchallenge/techfood-payment-api:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: techfood-shared-config
+            - configMapRef:
+                name: techfood-payment-config
+            - secretRef:
+                name: techfood-shared-secret
+            - secretRef:
+                name: techfood-payment-secret
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 5
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 5
+            failureThreshold: 3
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "1Gi"
+              cpu: "500m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: techfood-payment-api-service
+  namespace: techfood
+  labels:
+    app.kubernetes.io/name: techfood-payment-api
+    app.kubernetes.io/component: backend
+    app.kubernetes.io/part-of: techfood-system
+spec:
+  ports:
+    - port: 8080
+      targetPort: 8080
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: techfood-payment-api
+  type: ClusterIP

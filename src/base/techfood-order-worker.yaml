@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: techfood-order-worker
+  namespace: techfood
+  labels:
+    app.kubernetes.io/name: techfood-order-worker
+    app.kubernetes.io/component: worker
+    app.kubernetes.io/part-of: techfood-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: techfood-order-worker
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: techfood-order-worker
+        app.kubernetes.io/component: worker
+        app.kubernetes.io/part-of: techfood-system
+    spec:
+      containers:
+        - name: techfood-order-worker
+          image: grupotechchallenge/techfood-order-worker:latest
+          imagePullPolicy: Always
+          envFrom:
+            - configMapRef:
+                name: techfood-shared-config
+            - configMapRef:
+                name: techfood-order-config
+            - secretRef:
+                name: techfood-shared-secret
+            - secretRef:
+                name: techfood-order-secret
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "250m"
