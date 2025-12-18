@@ -105,23 +105,31 @@ jobs:
 
           kubectl patch secret techfood-order-secret -n ${{ env.NAMESPACE }} \
             --type='merge' \
-            --patch "{\"stringData\": {\"ConnectionStrings__DataBaseConection\": \"${ORDER_CONN}\"}}"
+            --patch "{\"stringData\": {
+              \"ConnectionStrings__DataBaseConection\": \"${ORDER_CONN}\",
+              \"Authentication__ClientSecret\": \"${{ secrets.ORDER_SERVICE_CLIENT_SECRET }}\"
+            }}"
 
           kubectl patch secret techfood-payment-secret -n ${{ env.NAMESPACE }} \
             --type='merge' \
             --patch "{\"stringData\": {
               \"ConnectionStrings__DataBaseConection\": \"${PAYMENT_CONN}\",
-              \"Payments__MercadoPago__AccessToken\": \"${{ secrets.MERCADO_PAGO_TOKEN }}\"
+              \"Payments__MercadoPago__AccessToken\": \"${{ secrets.MERCADO_PAGO_TOKEN }}\",
+              \"Authentication__ClientSecret\": \"${{ secrets.PAYMENT_SERVICE_CLIENT_SECRET }}\"
             }}"
 
           kubectl patch secret techfood-kitchen-secret -n ${{ env.NAMESPACE }} \
             --type='merge' \
-            --patch "{\"stringData\": {\"ConnectionStrings__DataBaseConection\": \"${KITCHEN_CONN}\"}}"
+            --patch "{\"stringData\": {
+              \"ConnectionStrings__DataBaseConection\": \"${KITCHEN_CONN}\",
+              \"Authentication__ClientSecret\": \"${{ secrets.KITCHEN_SERVICE_CLIENT_SECRET }}\"
+            }}"
 
           kubectl patch secret techfood-backoffice-secret -n ${{ env.NAMESPACE }} \
             --type='merge' \
             --patch "{\"stringData\": {
-              \"ConnectionStrings__DataBaseConection\": \"${BACKOFFICE_CONN}\"
+              \"ConnectionStrings__DataBaseConection\": \"${BACKOFFICE_CONN}\",
+              \"Authentication__ClientSecret\": \"${{ secrets.BACKOFFICE_SERVICE_CLIENT_SECRET }}\"
             }}"
 
       - name: Deployment Summary
