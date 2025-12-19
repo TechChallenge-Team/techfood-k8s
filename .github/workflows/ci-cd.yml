@@ -132,16 +132,6 @@ jobs:
               \"Authentication__ClientSecret\": \"${{ secrets.BACKOFFICE_SERVICE_CLIENT_SECRET }}\"
             }}"
 
-          kubectl patch secret techfood-kitchen-secret -n ${{ env.NAMESPACE }} \
-            --type='merge' \
-            --patch "{\"stringData\": {\"ConnectionStrings__DataBaseConection\": \"${KITCHEN_CONN}\"}}"
-
-          kubectl patch secret techfood-backoffice-secret -n ${{ env.NAMESPACE }} \
-            --type='merge' \
-            --patch "{\"stringData\": {
-              \"ConnectionStrings__DataBaseConection\": \"${BACKOFFICE_CONN}\"
-            }}"
-
       - name: Deployment Summary
         run: |
           echo "🎉 TechFood API deployed successfully!"
