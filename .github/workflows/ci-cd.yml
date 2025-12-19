@@ -91,10 +91,12 @@ jobs:
               --arg payment "${{ steps.tf_outputs.outputs.api_gateway_url }}/api/payment" \
               --arg backoffice "${{ steps.tf_outputs.outputs.api_gateway_url }}/api/backoffice" \
               --arg kitchen "${{ steps.tf_outputs.outputs.api_gateway_url }}/api/kitchen" \
-              '{data: {"Services__Authentication": $auth, "Services__Order": $order, "Services__Payment": $payment, "Services__Backoffice": $backoffice, "Services__Kitchen": $kitchen}}')"
+              --arg rabbitHost "${{ vars.RABBITMQ_HOSTNAME }}" \
+              --arg rabbitPort "${{ vars.RABBITMQ_PORT }}" \
+              '{data: {"Services__Authentication": $auth, "Services__Order": $order, "Services__Payment": $payment, "Services__Backoffice": $backoffice, "Services__Kitchen": $kitchen, "EventBus__RabbitMQ__HostName": $rabbitHost, "EventBus__RabbitMQ__Port": $rabbitPort}}')"
 
           # Atualizar secrets compartilhados e de cada serviço
-
+          kubectl patch secret techfood-shared-secret -n ${{ env.NAMESPACE }} \
             --type='merge' \
             --patch "$(jq -n --arg jwtKey "${{ secrets.JWT_KEY }}" \
               --arg rabbitUser "${{ secrets.RABBITMQ_USERNAME }}" \
