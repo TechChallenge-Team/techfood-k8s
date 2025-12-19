@@ -88,11 +88,13 @@ As seguintes imagens Docker são construídas:
 
 | Componente | Dockerfile | Contexto | Registro |
 |------------|------------|----------|----------|
-| API | `src/TechFood.Api/Dockerfile` | `.` | `ghcr.io/{owner}/techfood-api` |
+| Order API | `src/TechFood.OrderService.Api/Dockerfile` | `.` | `ghcr.io/{owner}/techfood-order-api` |
+| Payment API | `src/TechFood.PaymentService.Api/Dockerfile` | `.` | `ghcr.io/{owner}/techfood-payment-api` |
+| Backoffice API | `src/TechFood.BackofficeService.Api/Dockerfile` | `.` | `ghcr.io/{owner}/techfood-backoffice-api` |
+| Kitchen API | `src/TechFood.KitchenService.Api/Dockerfile` | `.` | `ghcr.io/{owner}/techfood-kitchen-api` |
 | Admin | `apps/admin/Dockerfile` | `.` | `ghcr.io/{owner}/techfood-admin` |
 | Self-Order | `apps/self-order/Dockerfile` | `.` | `ghcr.io/{owner}/techfood-self-order` |
 | Monitor | `apps/monitor/Dockerfile` | `.` | `ghcr.io/{owner}/techfood-monitor` |
-| Nginx | `nginx/Dockerfile` | `nginx/` | `ghcr.io/{owner}/techfood-nginx` |
 
 ## 🎯 Estratégia de Tagging
 
@@ -165,11 +167,14 @@ kubectl get events -n techfood --sort-by='.metadata.creationTimestamp'
 
 ### Health Checks
 ```bash
-# Verificar API health
-kubectl exec -n techfood deployment/techfood-api -- curl -f http://localhost:8080/health
+# Verificar Order API health
+kubectl exec -n techfood deployment/techfood-order-api -- curl -f http://localhost:8080/health
 
-# Port forward para acesso local
-kubectl port-forward service/techfood-nginx-service 30000:30000 -n techfood
+# Verificar Backoffice API health
+kubectl exec -n techfood deployment/techfood-backoffice-api -- curl -f http://localhost:8080/health
+
+# Port forward para acesso via Ingress
+kubectl port-forward -n ingress-nginx service/ingress-nginx-controller 8080:80
 ```
 
 ## 🔄 Rollback
@@ -179,14 +184,14 @@ Em caso de falha no deploy, o workflow `manual-deploy.yml` mostra opções de ro
 
 ### Rollback Manual
 ```bash
-# Ver histórico de deploy
-kubectl rollout history deployment/techfood-api -n techfood
+# Ver histórico de deploy (exemplo: Order API)
+kubectl rollout history deployment/techfood-order-api -n techfood
 
 # Rollback para versão anterior
-kubectl rollout undo deployment/techfood-api -n techfood
+kubectl rollout undo deployment/techfood-order-api -n techfood
 
 # Rollback para versão específica
-kubectl rollout undo deployment/techfood-api --to-revision=2 -n techfood
+kubectl rollout undo deployment/techfood-order-api --to-revision=2 -n techfood
 ```
 
 ## 🛡️ Segurança
