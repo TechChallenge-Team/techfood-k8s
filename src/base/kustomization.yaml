@@ -9,7 +9,6 @@ resources:
   - secrets.yaml
   - storage.yaml
   - rabbitmq.yaml
-  - mongodb.yaml
   - techfood-order-api.yaml
   - techfood-order-worker.yaml
   # - techfood-payment-api.yaml

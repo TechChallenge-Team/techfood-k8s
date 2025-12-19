@@ -8,11 +8,11 @@ metadata:
     app.kubernetes.io/component: config
     app.kubernetes.io/part-of: techfood-system
 data:
-  Services__Authentication: "http://localhost:45000/"
-  Services__Order: "http://localhost:45001/"
-  Services__Payment: "http://localhost:45002/"
-  Services__Backoffice: "http://localhost:45004/"
-  Services__Kitchen: "http://localhost:45005/"
+  Services__Authentication: "http://techfood-order-api-service.techfood.svc.cluster.local:8080"
+  Services__Order: "http://techfood-order-api-service.techfood.svc.cluster.local:8080"
+  Services__Payment: "http://techfood-payment-api-service.techfood.svc.cluster.local:8080"
+  Services__Backoffice: "http://techfood-backoffice-api-service.techfood.svc.cluster.local:8080"
+  Services__Kitchen: "http://techfood-kitchen-api-service.techfood.svc.cluster.local:8080"
   EventBus__RabbitMQ__HostName: "rabbitmq-service.techfood.svc.cluster.local"
   EventBus__RabbitMQ__Port: "5672"
 ---
