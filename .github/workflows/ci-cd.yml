@@ -81,7 +81,7 @@ jobs:
           ORDER_CONN="Server=${{ steps.tf_outputs.outputs.rds_endpoint }};Database=techfood_order;User Id=${{ secrets.RDS_USERNAME }};Password=${{ secrets.RDS_PASSWORD }};TrustServerCertificate=True;"
           PAYMENT_CONN="Server=${{ steps.tf_outputs.outputs.rds_endpoint }};Database=techfood_payment;User Id=${{ secrets.RDS_USERNAME }};Password=${{ secrets.RDS_PASSWORD }};TrustServerCertificate=True;"
           KITCHEN_CONN="Server=${{ steps.tf_outputs.outputs.rds_endpoint }};Database=techfood_kitchen;User Id=${{ secrets.RDS_USERNAME }};Password=${{ secrets.RDS_PASSWORD }};TrustServerCertificate=True;"
-          BACKOFFICE_CONN="${{ secrets.MONGODB_ATLAS_CONNECTION_STRING }}"
+          BACKOFFICE_CONN="${{ secrets.MONGODB_CONNECTION_STRING }}"
 
           # Atualizar config compartilhada com descoberta de serviços
           kubectl patch configmap techfood-shared-config -n ${{ env.NAMESPACE }} \
