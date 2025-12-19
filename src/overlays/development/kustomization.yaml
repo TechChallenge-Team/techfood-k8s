@@ -6,8 +6,8 @@ namespace: techfood
 resources:
   - ../../base
 
-patchesStrategicMerge:
-  - development-patches.yaml
+patches:
+  - path: development-patches.yaml
 
 commonLabels:
   environment: development
