@@ -86,13 +86,12 @@ jobs:
           # Atualizar config compartilhada com descoberta de serviços
           kubectl patch configmap techfood-shared-config -n ${{ env.NAMESPACE }} \
             --type='merge' \
-            --patch "{\"data\": {
-              \"Services__Authentication\": \"${{ steps.tf_outputs.outputs.auth_api_invoke_url }}\",
-              \"Services__Order\": \"${{ steps.tf_outputs.outputs.api_gateway_url }}/api/order\",
-              "Services__Payment": "${{ steps.tf_outputs.outputs.api_gateway_url }}/api/payment",
-              "Services__Backoffice": "${{ steps.tf_outputs.outputs.api_gateway_url }}/api/backoffice",
-              "Services__Kitchen": "${{ steps.tf_outputs.outputs.api_gateway_url }}/api/kitchen"
-            }}"
+            --patch "$(jq -n --arg auth "${{ steps.tf_outputs.outputs.auth_api_invoke_url }}" \
+              --arg order "${{ steps.tf_outputs.outputs.api_gateway_url }}/api/order" \
+              --arg payment "${{ steps.tf_outputs.outputs.api_gateway_url }}/api/payment" \
+              --arg backoffice "${{ steps.tf_outputs.outputs.api_gateway_url }}/api/backoffice" \
+              --arg kitchen "${{ steps.tf_outputs.outputs.api_gateway_url }}/api/kitchen" \
+              '{data: {"Services__Authentication": $auth, "Services__Order": $order, "Services__Payment": $payment, "Services__Backoffice": $backoffice, "Services__Kitchen": $kitchen}}')"
 
           # Atualizar secrets compartilhados e de cada serviço
           kubectl patch secret techfood-shared-secret -n ${{ env.NAMESPACE }} \
