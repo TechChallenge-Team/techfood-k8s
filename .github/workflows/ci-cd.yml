@@ -94,6 +94,12 @@ jobs:
               '{data: {"Services__Authentication": $auth, "Services__Order": $order, "Services__Payment": $payment, "Services__Backoffice": $backoffice, "Services__Kitchen": $kitchen}}')"
 
           # Atualizar secrets compartilhados e de cada serviço
+          kubectl patch secret mongodb-secret -n ${{ env.NAMESPACE }} \
+            --type='merge' \
+            --patch "$(jq -n --arg username "${{ secrets.DOCDB_USERNAME }}" \
+              --arg password "${{ secrets.DOCDB_PASSWORD }}" \
+              '{stringData: {"username": $username, "password": $password}}')"
+
           kubectl patch secret techfood-shared-secret -n ${{ env.NAMESPACE }} \
             --type='merge' \
             --patch "$(jq -n --arg jwtKey "${{ secrets.JWT_KEY }}" \

@@ -9,13 +9,14 @@ resources:
   - secrets.yaml
   - storage.yaml
   - rabbitmq.yaml
+  - mongodb.yaml
   - techfood-order-api.yaml
   - techfood-order-worker.yaml
   # - techfood-payment-api.yaml
   # - techfood-payment-worker.yaml
   - techfood-backoffice-api.yaml
-  # - techfood-kitchen-api.yaml
-  # - techfood-kitchen-worker.yaml
+  - techfood-kitchen-api.yaml
+  - techfood-kitchen-worker.yaml
   # - techfood-admin.yaml
   # - techfood-self-order.yaml
   # - techfood-monitor.yaml
