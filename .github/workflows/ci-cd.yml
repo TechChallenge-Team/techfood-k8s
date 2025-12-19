@@ -86,51 +86,45 @@ jobs:
           # Atualizar config compartilhada com descoberta de serviços
           kubectl patch configmap techfood-shared-config -n ${{ env.NAMESPACE }} \
             --type='merge' \
-            --patch "{\"data\": {
-              \"Services__Authentication\": \"${{ steps.tf_outputs.outputs.auth_api_invoke_url }}\",
-              \"Services__Order\": \"${{ steps.tf_outputs.outputs.api_gateway_url }}/api/order\",
-              "Services__Payment": "${{ steps.tf_outputs.outputs.api_gateway_url }}/api/payment",
-              "Services__Backoffice": "${{ steps.tf_outputs.outputs.api_gateway_url }}/api/backoffice",
-              "Services__Kitchen": "${{ steps.tf_outputs.outputs.api_gateway_url }}/api/kitchen"
-            }}"
+            --patch "$(jq -n --arg auth "${{ steps.tf_outputs.outputs.auth_api_invoke_url }}" \
+              --arg order "${{ steps.tf_outputs.outputs.api_gateway_url }}/api/order" \
+              --arg payment "${{ steps.tf_outputs.outputs.api_gateway_url }}/api/payment" \
+              --arg backoffice "${{ steps.tf_outputs.outputs.api_gateway_url }}/api/backoffice" \
+              --arg kitchen "${{ steps.tf_outputs.outputs.api_gateway_url }}/api/kitchen" \
+              '{data: {"Services__Authentication": $auth, "Services__Order": $order, "Services__Payment": $payment, "Services__Backoffice": $backoffice, "Services__Kitchen": $kitchen}}')"
 
           # Atualizar secrets compartilhados e de cada serviço
           kubectl patch secret techfood-shared-secret -n ${{ env.NAMESPACE }} \
             --type='merge' \
-            --patch "{\"stringData\": {
-              \"Authentication__Jwt__Key\": \"${{ secrets.JWT_KEY }}\",
-              \"EventBus__RabbitMQ__UserName\": \"${{ secrets.RABBITMQ_USERNAME }}\",
-              \"EventBus__RabbitMQ__Password\": \"${{ secrets.RABBITMQ_PASSWORD }}\"
-            }}"
+            --patch "$(jq -n --arg jwtKey "${{ secrets.JWT_KEY }}" \
+              --arg rabbitUser "${{ secrets.RABBITMQ_USERNAME }}" \
+              --arg rabbitPass "${{ secrets.RABBITMQ_PASSWORD }}" \
+              '{stringData: {"Authentication__Jwt__Key": $jwtKey, "EventBus__RabbitMQ__UserName": $rabbitUser, "EventBus__RabbitMQ__Password": $rabbitPass}}')"
 
           kubectl patch secret techfood-order-secret -n ${{ env.NAMESPACE }} \
             --type='merge' \
-            --patch "{\"stringData\": {
-              \"ConnectionStrings__DataBaseConection\": \"${ORDER_CONN}\",
-              \"Authentication__ClientSecret\": \"${{ secrets.ORDER_SERVICE_CLIENT_SECRET }}\"
-            }}"
+            --patch "$(jq -n --arg conn "${ORDER_CONN}" \
+              --arg secret "${{ secrets.ORDER_SERVICE_CLIENT_SECRET }}" \
+              '{stringData: {"ConnectionStrings__DataBaseConection": $conn, "Authentication__ClientSecret": $secret}}')"
 
           kubectl patch secret techfood-payment-secret -n ${{ env.NAMESPACE }} \
             --type='merge' \
-            --patch "{\"stringData\": {
-              \"ConnectionStrings__DataBaseConection\": \"${PAYMENT_CONN}\",
-              \"Payments__MercadoPago__AccessToken\": \"${{ secrets.MERCADO_PAGO_TOKEN }}\",
-              \"Authentication__ClientSecret\": \"${{ secrets.PAYMENT_SERVICE_CLIENT_SECRET }}\"
-            }}"
+            --patch "$(jq -n --arg conn "${PAYMENT_CONN}" \
+              --arg token "${{ secrets.MERCADO_PAGO_TOKEN }}" \
+              --arg secret "${{ secrets.PAYMENT_SERVICE_CLIENT_SECRET }}" \
+              '{stringData: {"ConnectionStrings__DataBaseConection": $conn, "Payments__MercadoPago__AccessToken": $token, "Authentication__ClientSecret": $secret}}')"
 
           kubectl patch secret techfood-kitchen-secret -n ${{ env.NAMESPACE }} \
             --type='merge' \
-            --patch "{\"stringData\": {
-              \"ConnectionStrings__DataBaseConection\": \"${KITCHEN_CONN}\",
-              \"Authentication__ClientSecret\": \"${{ secrets.KITCHEN_SERVICE_CLIENT_SECRET }}\"
-            }}"
+            --patch "$(jq -n --arg conn "${KITCHEN_CONN}" \
+              --arg secret "${{ secrets.KITCHEN_SERVICE_CLIENT_SECRET }}" \
+              '{stringData: {"ConnectionStrings__DataBaseConection": $conn, "Authentication__ClientSecret": $secret}}')"
 
           kubectl patch secret techfood-backoffice-secret -n ${{ env.NAMESPACE }} \
             --type='merge' \
-            --patch "{\"stringData\": {
-              \"ConnectionStrings__DataBaseConection\": \"${BACKOFFICE_CONN}\",
-              \"Authentication__ClientSecret\": \"${{ secrets.BACKOFFICE_SERVICE_CLIENT_SECRET }}\"
-            }}"
+            --patch "$(jq -n --arg conn "${BACKOFFICE_CONN}" \
+              --arg secret "${{ secrets.BACKOFFICE_SERVICE_CLIENT_SECRET }}" \
+              '{stringData: {"ConnectionStrings__DataBaseConection": $conn, "Authentication__ClientSecret": $secret}}')"
 
       - name: Deployment Summary
         run: |
