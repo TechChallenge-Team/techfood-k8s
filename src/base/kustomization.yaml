@@ -8,7 +8,6 @@ resources:
   - configmaps.yaml
   - secrets.yaml
   - storage.yaml
-  - rabbitmq.yaml
   - techfood-order-api.yaml
   - techfood-order-worker.yaml
   # - techfood-payment-api.yaml

@@ -207,7 +207,6 @@ src/
 │   ├── configmaps.yaml            # Configurações não sensíveis
 │   ├── secrets.yaml               # Dados sensíveis
 │   ├── storage.yaml               # Persistent Volume Claims
-│   ├── rabbitmq.yaml              # RabbitMQ deployment
 │   ├── techfood-order-api.yaml    # Order API deployment
 │   ├── techfood-order-worker.yaml # Order Worker deployment
 │   ├── techfood-payment-api.yaml  # Payment API deployment
@@ -321,10 +320,10 @@ minikube logs
 
 ```bash
 # Testar Order API
-kubectl exec -it deployment/rabbitmq -n techfood -- curl -v http://techfood-order-api-service:8080/health
+kubectl exec -it deployment/techfood-order-api -n techfood -- curl -v http://localhost:8080/health
 
 # Testar Backoffice API
-kubectl exec -it deployment/rabbitmq -n techfood -- curl -v http://techfood-backoffice-api-service:8080/health
+kubectl exec -it deployment/techfood-backoffice-api -n techfood -- curl -v http://localhost:8080/health
 ```
 
 ### Reiniciar o deployment Nginx
