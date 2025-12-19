@@ -231,7 +231,7 @@ aws elbv2 describe-target-health --target-group-arn <arn>
 **R:** Sim, use `setup-ingress.sh` para Minikube ou `setup-ingress-eks.bat` para rodar manualmente.
 
 ### P: Como sei se está funcionando?
-**R:** 
+**R:**
 1. Veja logs do GitHub Actions (deve mostrar SUCCESS)
 2. `kubectl get pods -n ingress-nginx` deve mostrar pods Running
 3. API Gateway deve responder com 200 OK
