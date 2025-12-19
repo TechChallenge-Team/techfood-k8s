@@ -206,12 +206,19 @@ src/
 │   ├── namespace.yaml             # Namespace da aplicação
 │   ├── configmaps.yaml            # Configurações não sensíveis
 │   ├── secrets.yaml               # Dados sensíveis
-│   ├── pvc.yaml                   # Persistent Volume Claims
-│   ├── techfood-api.yaml          # API deployment
+│   ├── storage.yaml               # Persistent Volume Claims
+│   ├── rabbitmq.yaml              # RabbitMQ deployment
+│   ├── techfood-order-api.yaml    # Order API deployment
+│   ├── techfood-order-worker.yaml # Order Worker deployment
+│   ├── techfood-payment-api.yaml  # Payment API deployment
+│   ├── techfood-payment-worker.yaml # Payment Worker deployment
+│   ├── techfood-backoffice-api.yaml # Backoffice API deployment
+│   ├── techfood-kitchen-api.yaml  # Kitchen API deployment
+│   ├── techfood-kitchen-worker.yaml # Kitchen Worker deployment
 │   ├── techfood-admin.yaml        # Admin app deployment
 │   ├── techfood-self-order.yaml   # Self-order app deployment
 │   ├── techfood-monitor.yaml      # Monitor app deployment
-│   ├── techfood-nginx.yaml        # Nginx deployment
+│   ├── techfood-ingress.yaml      # Ingress configuration
 │   ├── hpa.yaml                   # Horizontal Pod Autoscalers
 │   └── kustomization.yaml         # Kustomize configuration
 ├── overlays/
@@ -310,10 +317,14 @@ minikube dashboard
 minikube logs
 ```
 
-### Testar se a API está respondendo dentro do cluster
+### Testar serviços dentro do cluster
 
 ```bash
-kubectl exec -it deployment/techfood-nginx -n techfood -- curl -v http://techfood-api-service:8080/health
+# Testar Order API
+kubectl exec -it deployment/rabbitmq -n techfood -- curl -v http://techfood-order-api-service:8080/health
+
+# Testar Backoffice API
+kubectl exec -it deployment/rabbitmq -n techfood -- curl -v http://techfood-backoffice-api-service:8080/health
 ```
 
 ### Reiniciar o deployment Nginx

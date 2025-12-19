@@ -172,14 +172,14 @@
             "detail": "Cria um port-forward para acessar a aplicação em localhost:30000"
         },
         {
-            "label": "📝 Watch Pod Logs (API)",
+            "label": "📝 Watch Pod Logs (Order API)",
             "type": "shell",
             "command": "kubectl",
             "args": [
                 "logs",
                 "-f",
                 "-l",
-                "app.kubernetes.io/name=techfood-api",
+                "app.kubernetes.io/name=techfood-order-api",
                 "-n",
                 "techfood"
             ],

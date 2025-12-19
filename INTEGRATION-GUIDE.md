@@ -36,13 +36,14 @@ Este documento explica como o API Gateway se conecta ao cluster EKS através do 
 ┌─────────────────────┐
 │  Kubernetes         │
 │  Services           │
-│  (techfood-api-svc) │
+│  (order, payment,   │
+│   backoffice, etc)  │
 └──────┬──────────────┘
        │
        ▼
 ┌─────────────────────┐
 │  Pods               │
-│  (techfood-api)     │
+│  (Microservices)    │
 └─────────────────────┘
 ```
 
@@ -225,9 +226,9 @@ export TARGET_GROUP_ARN="arn:aws:elasticloadbalancing:..."
 
 **Verificar:**
 ```bash
-# 1. Service existe e tem endpoints?
+# 1. Services existem e têm endpoints?
 kubectl get svc -n techfood
-kubectl get endpoints techfood-api-svc -n techfood
+kubectl get endpoints -n techfood
 
 # 2. Pods estão rodando?
 kubectl get pods -n techfood
@@ -276,9 +277,9 @@ curl http://localhost:10254/metrics
             ↓
 4. NGINX Ingress Controller (pod) → verifica regras do Ingress
                                       ↓
-5. Roteamento → Service: techfood-api-svc:80
+5. Roteamento → Service (ex: techfood-order-api-service:80)
                           ↓
-6. Service → Pod: techfood-api:8080
+6. Service → Pod (ex: techfood-order-api:8080)
                    ↓
 7. Aplicação processa → retorna resposta
                           ↓

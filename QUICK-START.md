@@ -50,13 +50,13 @@
                       ▼
           ┌────────────────────────┐
           │  Kubernetes Services   │ ← Manifestos K8s
-          │  (techfood-api-svc)    │
+          │  (order, payment, etc) │
           └───────────┬────────────┘
                       │
                       ▼
           ┌────────────────────────┐
           │  Pods                  │
-          │  (techfood-api)        │
+          │  (Microservices)       │
           └────────────────────────┘
 ```
 

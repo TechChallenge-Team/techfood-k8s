@@ -128,5 +128,5 @@ jobs:
 
       - name: Deployment Summary
         run: |
-          echo "🎉 TechFood API deployed successfully!"
-          kubectl get pods -l app.kubernetes.io/name=techfood-api -n ${{ env.NAMESPACE }}
+          echo "🎉 TechFood Microservices deployed successfully!"
+          kubectl get pods -n ${{ env.NAMESPACE }}
