@@ -87,12 +87,12 @@ jobs:
           kubectl patch configmap techfood-shared-config -n ${{ env.NAMESPACE }} \
             --type='merge' \
             --patch "$(jq -n --arg auth "${{ steps.tf_outputs.outputs.auth_api_invoke_url }}" \
-              --arg order "${{ steps.tf_outputs.outputs.api_gateway_url }}/api/order" \
-              --arg payment "${{ steps.tf_outputs.outputs.api_gateway_url }}/api/payment" \
-              --arg backoffice "${{ steps.tf_outputs.outputs.api_gateway_url }}/api/backoffice" \
-              --arg kitchen "${{ steps.tf_outputs.outputs.api_gateway_url }}/api/kitchen" \
-              --arg rabbitHost "${{ vars.RABBITMQ_HOSTNAME }}" \
-              --arg rabbitPort "${{ vars.RABBITMQ_PORT }}" \
+              --arg order "http://techfood-order-api-service.techfood.svc.cluster.local:8080" \
+              --arg payment "http://techfood-payment-api-service.techfood.svc.cluster.local:8080" \
+              --arg backoffice "http://techfood-backoffice-api-service.techfood.svc.cluster.local:8080" \
+              --arg kitchen "http://techfood-kitchen-api-service.techfood.svc.cluster.local:8080" \
+              --arg rabbitHost "rabbitmq-service.techfood.svc.cluster.local" \
+              --arg rabbitPort "5672" \
               '{data: {"Services__Authentication": $auth, "Services__Order": $order, "Services__Payment": $payment, "Services__Backoffice": $backoffice, "Services__Kitchen": $kitchen, "EventBus__RabbitMQ__HostName": $rabbitHost, "EventBus__RabbitMQ__Port": $rabbitPort}}')"
 
           # Atualizar secrets compartilhados e de cada serviço
