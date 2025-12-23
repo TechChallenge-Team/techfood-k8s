@@ -8,7 +8,7 @@ metadata:
     app.kubernetes.io/component: config
     app.kubernetes.io/part-of: techfood-system
 data:
-  Services__Authentication: "http://techfood-order-api-service.techfood.svc.cluster.local:8080"
+  Services__Authentication: "https://leeo0xc7l4.execute-api.us-east-1.amazonaws.com/auth"
   Services__Order: "http://techfood-order-api-service.techfood.svc.cluster.local:8080"
   Services__Payment: "http://techfood-payment-api-service.techfood.svc.cluster.local:8080"
   Services__Backoffice: "http://techfood-backoffice-api-service.techfood.svc.cluster.local:8080"
