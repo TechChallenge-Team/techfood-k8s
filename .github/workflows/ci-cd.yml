@@ -99,8 +99,8 @@ jobs:
           kubectl patch secret techfood-shared-secret -n ${{ env.NAMESPACE }} \
             --type='merge' \
             --patch "$(jq -n --arg jwtKey "${{ secrets.JWT_KEY }}" \
-              --arg rabbitUser "guest" \
-              --arg rabbitPass "guest" \
+              --arg rabbitUser "${{ secrets.RABBITMQ_USERNAME }}" \
+              --arg rabbitPass "${{ secrets.RABBITMQ_PASSWORD }}" \
               '{stringData: {"Authentication__Jwt__Key": $jwtKey, "EventBus__RabbitMQ__UserName": $rabbitUser, "EventBus__RabbitMQ__Password": $rabbitPass}}')"
 
           kubectl patch secret techfood-order-secret -n ${{ env.NAMESPACE }} \
