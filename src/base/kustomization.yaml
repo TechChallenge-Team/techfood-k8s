@@ -11,8 +11,8 @@ resources:
   - rabbitmq.yaml
   - techfood-order-api.yaml
   - techfood-order-worker.yaml
-  # - techfood-payment-api.yaml
-  # - techfood-payment-worker.yaml
+  - techfood-payment-api.yaml
+  - techfood-payment-worker.yaml
   - techfood-backoffice-api.yaml
   - techfood-kitchen-api.yaml
   - techfood-kitchen-worker.yaml
