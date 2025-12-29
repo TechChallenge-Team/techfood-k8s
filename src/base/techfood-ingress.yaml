@@ -1,10 +1,11 @@
+# Ingress para rotas de API com rewrite
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: techfood-ingress
+  name: techfood-api-ingress
   namespace: techfood
   labels:
-    app.kubernetes.io/name: techfood-ingress
+    app.kubernetes.io/name: techfood-api-ingress
     app.kubernetes.io/component: ingress
     app.kubernetes.io/part-of: techfood-system
   annotations:
@@ -16,8 +17,95 @@ metadata:
     nginx.ingress.kubernetes.io/proxy-set-headers: "techfood/custom-headers"
     nginx.ingress.kubernetes.io/upstream-vhost: "$host"
     nginx.ingress.kubernetes.io/use-forwarded-headers: "true"
-    # Rewrite para rota /api
+    # Rewrite para remover /api do path
     nginx.ingress.kubernetes.io/rewrite-target: /$2
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: techfood.local
+    http:
+      paths:
+      # API endpoints (com rewrite)
+      - path: /api/order(/|$)(.*)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: techfood-order-api-service
+            port:
+              number: 8080
+      - path: /api/payment(/|$)(.*)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: techfood-payment-api-service
+            port:
+              number: 8080
+      - path: /api/backoffice(/|$)(.*)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: techfood-backoffice-api-service
+            port:
+              number: 8080
+      - path: /api/kitchen(/|$)(.*)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: techfood-kitchen-api-service
+            port:
+              number: 8080
+  # Para acesso via IP local (opcional)
+  - http:
+      paths:
+      # API endpoints
+      - path: /api/order(/|$)(.*)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: techfood-order-api-service
+            port:
+              number: 8080
+      - path: /api/payment(/|$)(.*)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: techfood-payment-api-service
+            port:
+              number: 8080
+      - path: /api/backoffice(/|$)(.*)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: techfood-backoffice-api-service
+            port:
+              number: 8080
+      - path: /api/kitchen(/|$)(.*)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: techfood-kitchen-api-service
+            port:
+              number: 8080
+---
+# Ingress para rotas de frontend e health sem rewrite
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: techfood-frontend-ingress
+  namespace: techfood
+  labels:
+    app.kubernetes.io/name: techfood-frontend-ingress
+    app.kubernetes.io/component: ingress
+    app.kubernetes.io/part-of: techfood-system
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "30"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "30"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "30"
+    nginx.ingress.kubernetes.io/proxy-set-headers: "techfood/custom-headers"
+    nginx.ingress.kubernetes.io/upstream-vhost: "$host"
+    nginx.ingress.kubernetes.io/use-forwarded-headers: "true"
 spec:
   ingressClassName: nginx
   rules:
@@ -56,35 +144,6 @@ spec:
             name: techfood-monitor-service
             port:
               number: 80
-      # API endpoints (com rewrite)
-      - path: /api/order(/|$)(.*)
-        pathType: ImplementationSpecific
-        backend:
-          service:
-            name: techfood-order-api-service
-            port:
-              number: 8080
-      - path: /api/payment(/|$)(.*)
-        pathType: ImplementationSpecific
-        backend:
-          service:
-            name: techfood-payment-api-service
-            port:
-              number: 8080
-      - path: /api/backoffice(/|$)(.*)
-        pathType: ImplementationSpecific
-        backend:
-          service:
-            name: techfood-backoffice-api-service
-            port:
-              number: 8080
-      - path: /api/kitchen(/|$)(.*)
-        pathType: ImplementationSpecific
-        backend:
-          service:
-            name: techfood-kitchen-api-service
-            port:
-              number: 8080
       # Health check
       - path: /health
         pathType: Prefix
@@ -128,35 +187,6 @@ spec:
             name: techfood-monitor-service
             port:
               number: 80
-      # API endpoints
-      - path: /api/order(/|$)(.*)
-        pathType: ImplementationSpecific
-        backend:
-          service:
-            name: techfood-order-api-service
-            port:
-              number: 8080
-      - path: /api/payment(/|$)(.*)
-        pathType: ImplementationSpecific
-        backend:
-          service:
-            name: techfood-payment-api-service
-            port:
-              number: 8080
-      - path: /api/backoffice(/|$)(.*)
-        pathType: ImplementationSpecific
-        backend:
-          service:
-            name: techfood-backoffice-api-service
-            port:
-              number: 8080
-      - path: /api/kitchen(/|$)(.*)
-        pathType: ImplementationSpecific
-        backend:
-          service:
-            name: techfood-kitchen-api-service
-            port:
-              number: 8080
       # Health check
       - path: /health
         pathType: Prefix

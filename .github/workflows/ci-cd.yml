@@ -84,13 +84,14 @@ jobs:
           BACKOFFICE_CONN="mongodb+srv://${{ secrets.DOCDB_USERNAME }}:${{ secrets.DOCDB_PASSWORD }}@${{ vars.DOCDB_CLUSTER_ENDPOINT }}/techfood_backoffice?appName=${{ vars.DOCDB_APP_NAME }}"
 
           # Atualizar config compartilhada com descoberta de serviços
+          # IMPORTANTE: Usar URLs internas do Kubernetes para comunicação entre serviços (evita passar pelo Ingress)
           kubectl patch configmap techfood-shared-config -n ${{ env.NAMESPACE }} \
             --type='merge' \
             --patch "$(jq -n --arg auth "${{ steps.tf_outputs.outputs.auth_api_invoke_url }}" \
-              --arg order "${{ steps.tf_outputs.outputs.api_gateway_url }}/api/order" \
-              --arg payment "${{ steps.tf_outputs.outputs.api_gateway_url }}/api/payment" \
-              --arg backoffice "${{ steps.tf_outputs.outputs.api_gateway_url }}/api/backoffice" \
-              --arg kitchen "${{ steps.tf_outputs.outputs.api_gateway_url }}/api/kitchen" \
+              --arg order "http://techfood-order-api-service.techfood.svc.cluster.local:8080" \
+              --arg payment "http://techfood-payment-api-service.techfood.svc.cluster.local:8080" \
+              --arg backoffice "http://techfood-backoffice-api-service.techfood.svc.cluster.local:8080" \
+              --arg kitchen "http://techfood-kitchen-api-service.techfood.svc.cluster.local:8080" \
               --arg rabbitHost "${{ vars.RABBITMQ_HOSTNAME }}" \
               --arg rabbitPort "${{ vars.RABBITMQ_PORT }}" \
               '{data: {"Services__Authentication": $auth, "Services__Order": $order, "Services__Payment": $payment, "Services__Backoffice": $backoffice, "Services__Kitchen": $kitchen, "EventBus__RabbitMQ__HostName": $rabbitHost, "EventBus__RabbitMQ__Port": $rabbitPort}}')"
